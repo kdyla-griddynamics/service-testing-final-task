@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: Payment Gateway API
+  description: "This API is about to emulate some external service - Payment Gateway. For simplicity let's suppose it has only single endpoint that 'validates' a card for its correctness, whatever it means"
+  contact:
+    email: isemenov@griddynamics.com
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+tags:
+  - name: Card
+    description: Check a card's validity
+paths:
+  /card/verify:
+    post:
+      tags:
+        - Card
+      summary: Check the card
+      operationId: verifyCard
+      requestBody:
+        description: Card object that needs to be verified
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Card'
+        required: true
+      responses:
+        200:
+          description: Valid card data passed in request
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: Generated card token
+        400:
+          description: Invalid input (some fields are missing or malformed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        422:
+          description: Input is well-formed (all mandatory fields are present), but altogether they are not correspond to a valid card (e.g. expiry date for the card is not valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    Card:
+      required:
+        - cardNumber
+        - expiryYear
+        - expiryMonth
+      type: object
+      properties:
+        cardNumber:
+          type: string
+          description: 'TODO: add some limitation here (probably need to convert to number or an array of numbers'
+          example: 1234 5678 9098 7654
+        cardHolder:
+          type: string
+          description: ''
+          example: 'John Smith'
+        expiryYear:
+          type: integer
+          description: Last 2 digits of expiry year (e.g. '2020' should be passed as '20')
+          minimum: 0
+          maximum: 99
+        expiryMonth:
+          type: integer
+          minimum: 1
+          maximum: 12
+        cvv:
+          type: string
+          pattern: '[0-9]{3,4}'
+    Error:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: 'Some general error description'
+        errorMessage:
+          type: string
+          description: 'Detailed error description'

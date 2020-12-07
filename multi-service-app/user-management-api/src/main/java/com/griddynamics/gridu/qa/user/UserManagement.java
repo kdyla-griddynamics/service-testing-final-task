@@ -1,0 +1,12 @@
+package com.griddynamics.gridu.qa.user;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class UserManagement {
+
+    public static void main(String[] args) {
+        SpringApplication.run(UserManagement.class);
+    }
+}

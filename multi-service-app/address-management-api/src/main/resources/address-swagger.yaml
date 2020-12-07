@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: Address Management API
+  description: 'Internal API for CRUD operations under customer’s addresses. It also validates provided address (by checking for mandatory fields and comparing the list of zipcodes available for a state)'
+  contact:
+    email: isemenov@griddynamics.com
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+tags:
+  - name: Address
+    description: Access to users' addresses
+paths:
+  /address:
+    put:
+      tags:
+        - Address
+      summary: Update an existing address
+      operationId: updateAddress
+      requestBody:
+        description: Address object that needs to be updated
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+        required: true
+      responses:
+        200:
+          description: Address succesfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Address not found
+          content: {}
+        405:
+          description: Validation exception
+          content: {}
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - Address
+      summary: Add a new address
+      operationId: addAddress
+      requestBody:
+        description: Address object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+        required: true
+      responses:
+        201:
+          description: Address succesfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        405:
+          description: Invalid input
+          content: {}
+      x-codegen-request-body-name: body
+  /address/{userId}:
+    get:
+      tags:
+        - Address
+      summary: Find addresses by user ID
+      description: Returns a list of user addresses
+      operationId: getAddressesByUserId
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user for addresses to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+    post:
+      tags:
+        - Address
+      summary: Updates all addresses for a user with provided ID
+      operationId: updateAddressesByUserId
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user whose address need to be updated
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Address'
+      responses:
+        405:
+          description: Invalid input
+          content: {}
+    delete:
+      tags:
+        - Address
+      summary: Deletes all addresses for user by provided ID
+      operationId: deleteAllUserAddresses
+      parameters:
+        - name: userId
+          in: path
+          description: User id to delete their addresses
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+components:
+  schemas:
+    Address:
+      description: 'For simplicity we only take US addresses'
+      required:
+        - zip
+        - state
+        - city
+        - addressLine1
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+        userId:
+          type: integer
+          format: int64
+          minimum: 1
+        state:
+          type: string
+          enum: [AA, AE, AK, AL, AP, AR, AS, AZ, CA, CO, CT, DC, DE,
+                 FL, FM, GA, GU, HI, IA, ID, IL, IN, KS, KY, LA, MA,
+                 MD, ME, MH, MI, MN, MO, MP, MS, MT, NC, ND, NE, NH,
+                 NJ, NM, NV, NY, OH, OK, OR, PA, PR, PW, RI, SC, SD,
+                 TN, TX, UT, VA, VI, VT, WA, WI, WV, WY]
+          example: CA
+        zip:
+          type: string
+          minLength: 5
+          maxLength: 5
+          pattern: '^\d{5}$'
+          example: 08844
+        city:
+          type: string
+          example: Milpitas
+        addressLine1:
+          type: string
+          example: "620 N. McCarthy Boulevard"
+        addressLine2:
+          type: string

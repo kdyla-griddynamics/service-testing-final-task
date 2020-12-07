@@ -1,0 +1,80 @@
+version: '3'
+
+services:
+  mysql-docker-container:
+    image: mysql:5.7
+    env_file:
+      - db_variables.env
+    volumes:
+      - /data/mysql
+    # to avoid problems during script execution
+    command: --lower_case_table_names=1
+    ports:
+      - 3306:3306
+  am:
+    image: am-image
+    build:
+      context: "address-management-api"
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql-docker-container
+    ports:
+      - 8181:8181
+    environment:
+      - MYSQL_HOST=mysql-docker-container
+      - MYSQL_DATABASE=service
+      - MYSQL_PORT=3306
+    env_file:
+      - db_variables.env
+    volumes:
+      - /data/spring-boot-app
+
+  stub:
+    image: stub-image
+    build:
+      context: "payment-gateway-stub"
+      dockerfile: Dockerfile
+    ports:
+      - 8989:8989
+    volumes:
+      - /data/spring-boot-app
+
+  pm:
+    image: pm-image
+    build:
+      context: "payment-management-api"
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql-docker-container
+      - stub
+    ports:
+      - 8282:8282
+    environment:
+      - MYSQL_HOST=mysql-docker-container
+      - MYSQL_DATABASE=service
+      - MYSQL_PORT=3306
+    env_file:
+      - db_variables.env
+    volumes:
+      - /data/spring-boot-app
+
+  um:
+    image: pm-image
+    build:
+      context: "user-management-api"
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql-docker-container
+      - am
+      - pm
+    ports:
+      - 8080:8080
+    environment:
+      - MYSQL_HOST=mysql-docker-container
+      - MYSQL_DATABASE=service
+      - MYSQL_PORT=3306
+    env_file:
+      - db_variables.env
+    volumes:
+      - /data/spring-boot-app
+
