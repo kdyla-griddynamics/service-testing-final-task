@@ -25,5 +25,5 @@ In addition to this, update *payment.service.url*, *address.service.url* and *pa
 You should also add generated (by Swagger) classes into IDEA 
 (by marking corresponding "main" directories as "Generated sources root"):
 
-![img.png](img.png)
+![generated_resources.png](generated_resources.png)
 
