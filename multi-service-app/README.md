@@ -10,7 +10,10 @@ TODO:
 
 To start the app (all services + DB + stub) use Docker-Compose w/o any parameters specified 
 (assuming you are at the project root folder):\
-```docker-compose up```
+```
+mvn clean install
+docker-compose up
+```
 
 In order to start only single (or just not all) component(s) you could list all required 
 components as parameters for docker-compose command. E.g. start w/o stub:\
@@ -21,7 +24,7 @@ All components could be also easily started right from your IDE
 you need to specify proper values (same as in the db_variables.env file if you are using MySql container created 
 by this project's Docker-Compose execution).\
 Variables are: *MYSQL_HOST*, *MYSQL_PORT*, *MYSQL_DATABASE*, *MYSQL_USER*, *MYSQL_PASSWORD*\
-In addition to this, update *payment.service.url*, *address.service.url* and *payment.gateway.url*\
+In addition to this, update *payment.service.url*, *address.service.url* and *payment.gateway.url* environment variables.\
 You should also add generated (by Swagger) classes into IDEA 
 (by marking corresponding "main" directories as "Generated sources root"):
 
