@@ -1,5 +1,6 @@
 package com.griddynamics.gridu.qa.address.db.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,8 @@ import javax.persistence.Table;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity(name = "Address")
 @Table(name = "address")
 public class AddressModel {

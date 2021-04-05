@@ -1,4 +1,4 @@
-version: '3'
+version: '2.4'
 
 services:
   mysql-docker-container:
@@ -22,7 +22,7 @@ services:
       - 8181:8181
     environment:
       - MYSQL_HOST=mysql-docker-container
-      - MYSQL_DATABASE=service
+      - MYSQL_DATABASE=course_app
       - MYSQL_PORT=3306
     env_file:
       - db_variables.env
@@ -51,7 +51,7 @@ services:
       - 8282:8282
     environment:
       - MYSQL_HOST=mysql-docker-container
-      - MYSQL_DATABASE=service
+      - MYSQL_DATABASE=course_app
       - MYSQL_PORT=3306
     env_file:
       - db_variables.env
@@ -59,7 +59,7 @@ services:
       - /data/spring-boot-app
 
   um:
-    image: pm-image
+    image: um-image
     build:
       context: "user-management-api"
       dockerfile: Dockerfile
@@ -71,7 +71,7 @@ services:
       - 8080:8080
     environment:
       - MYSQL_HOST=mysql-docker-container
-      - MYSQL_DATABASE=service
+      - MYSQL_DATABASE=course_app
       - MYSQL_PORT=3306
     env_file:
       - db_variables.env
