@@ -1,5 +1,8 @@
 package com.griddynamics.gridu.qa.address.db.model;
 
+import javax.persistence.Basic;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +22,9 @@ import javax.persistence.Table;
 public class AddressModel {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id",unique=true, nullable = false)
     private Long id;
     @Column(name = "user_id")
     private Long userId;

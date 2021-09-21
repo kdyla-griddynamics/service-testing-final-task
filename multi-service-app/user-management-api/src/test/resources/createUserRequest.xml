@@ -1,0 +1,10 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:gen="http://gridu.qa.payment.griddynamics.com/springsoap/gen">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <gen:createUserRequest>
+      <gen:name>Johhny</gen:name>
+      <gen:lastName>Tyson</gen:lastName>
+      <gen:email>some-email2@gmail.com</gen:email>
+    </gen:createUserRequest>
+  </soapenv:Body>
+</soapenv:Envelope>
