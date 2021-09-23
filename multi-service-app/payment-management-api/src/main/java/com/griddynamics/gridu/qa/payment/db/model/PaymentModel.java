@@ -1,5 +1,7 @@
 package com.griddynamics.gridu.qa.payment.db.model;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -20,6 +22,7 @@ public class PaymentModel {
     public static final String FAILED_TOKEN = "FAILED";
 
     @Id
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
     @Column(name = "user_id")
     private Long userId;

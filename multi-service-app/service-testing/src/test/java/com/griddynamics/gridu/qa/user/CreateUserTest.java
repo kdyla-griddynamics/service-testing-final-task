@@ -6,6 +6,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
+import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
 import com.griddynamics.gridu.qa.util.ServicesConstants;
@@ -18,6 +19,7 @@ import java.util.NoSuchElementException;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.soap.SOAPException;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
@@ -33,10 +35,10 @@ public class CreateUserTest {
   @Test
   public void createUserRequestShouldReturnResponse(String name, String lastName, String email)
       throws IOException, ParserConfigurationException, SAXException, JAXBException, SOAPException {
-    CreateUserRequest request = getCreateUserRequest(name, lastName, email);
+    CreateUserRequest createUserRequest = getCreateUserRequest(name, lastName, email);
 
     InputStream responseInputStream = given(spec)
-        .body(getCreateUserRequestSOAP(request))
+        .body(getCreateUserRequestSOAP(createUserRequest))
         .when()
         .post()
         .then().log().all()
@@ -46,7 +48,7 @@ public class CreateUserTest {
 
     CreateUserResponse createUserResponse = extractCreateUserResponse(responseInputStream);
 
-    UserModel userModelFromRequest = dtoConverter.convertNewUser(request);
+    UserModel userModelFromRequest = dtoConverter.convertNewUser(createUserRequest);
     UserModel userModelFromResponse = dtoConverter
         .convertUserDetails(createUserResponse.getUserDetails());
 
@@ -59,17 +61,18 @@ public class CreateUserTest {
   public void createUserRequestWithAddressShouldReturnResponse(String name, String lastName,
       String email)
       throws IOException, ParserConfigurationException, SAXException, JAXBException, SOAPException {
-    NewAddress address = new NewAddress();
-    address.setZip("08844");
-    address.setState(State.CA);
-    address.setCity("Milpitas");
-    address.setLine1("620 N. McCarthy Boulevard");
-    address.setLine2("Orange County");
+    NewAddress newAddress = new NewAddress();
+    newAddress.setZip("08844");
+    newAddress.setState(State.CA);
+    newAddress.setCity("Milpitas");
+    newAddress.setLine1("620 N. McCarthy Boulevard");
+    newAddress.setLine2("Orange County");
 
-    CreateUserRequest request = getCreateUserRequestWithAddress(name, lastName, email, address);
+    CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(name, lastName, email,
+        newAddress);
 
     InputStream responseInputStream = given(spec)
-        .body(getCreateUserRequestSOAP(request))
+        .body(getCreateUserRequestSOAP(createUserRequest))
         .when()
         .post()
         .then().log().all()
@@ -89,9 +92,55 @@ public class CreateUserTest {
     assertThat((NewAddress) createdAddress)
         .usingRecursiveComparison()
         .ignoringFields("id")
-        .isEqualTo(address);
+        .isEqualTo(newAddress);
 
-    UserModel userModelFromRequest = dtoConverter.convertNewUser(request);
+    UserModel userModelFromRequest = dtoConverter.convertNewUser(createUserRequest);
+    UserModel userModelFromResponse = dtoConverter
+        .convertUserDetails(createUserResponse.getUserDetails());
+
+    assertThat(userModelFromResponse).usingRecursiveComparison().ignoringFields("id")
+        .isEqualTo(userModelFromRequest);
+  }
+
+  @Parameters({"name", "lastName", "email"})
+  @Test
+  public void createUserRequestWithPaymentShouldReturnResponse(String name, String lastName,
+      String email)
+      throws IOException, ParserConfigurationException, SAXException, JAXBException, SOAPException {
+    NewPayment newPayment = new NewPayment();
+    newPayment.setCardholder(String.format("%s %s", name, lastName));
+    newPayment.setCardNumber(RandomStringUtils.randomNumeric(16));
+    newPayment.setCvv(RandomStringUtils.randomNumeric(3));
+    newPayment.setExpiryMonth(4);
+    newPayment.setExpiryYear(2023);
+
+    CreateUserRequest createUserRequest = getCreateUserRequestWithPayment(name, lastName, email,
+        newPayment);
+
+    InputStream responseInputStream = given(spec)
+        .body(getCreateUserRequestSOAP(createUserRequest))
+        .when()
+        .post()
+        .then().log().all()
+        .assertThat().statusCode(200)
+        .and()
+        .extract().asInputStream();
+
+    CreateUserResponse createUserResponse = extractCreateUserResponse(responseInputStream);
+
+    assertThat(createUserResponse.getUserDetails().getPayments().getPayment()).isNotEmpty();
+
+    ExistingPayment existingPayment = createUserResponse.getUserDetails().getPayments().getPayment()
+        .stream()
+        .findFirst()
+        .orElseThrow(NoSuchElementException::new);
+
+    assertThat((NewPayment) existingPayment)
+        .usingRecursiveComparison()
+        .ignoringFields("id")
+        .isEqualTo(newPayment);
+
+    UserModel userModelFromRequest = dtoConverter.convertNewUser(createUserRequest);
     UserModel userModelFromResponse = dtoConverter
         .convertUserDetails(createUserResponse.getUserDetails());
 
@@ -117,4 +166,13 @@ public class CreateUserTest {
     return request;
   }
 
+  private CreateUserRequest getCreateUserRequestWithPayment(String name, String lastName,
+      String email, NewPayment newPayment) {
+    CreateUserRequest request = getCreateUserRequest(name, lastName, email);
+    Payments payments = new Payments();
+    payments.payment = new ArrayList<>();
+    payments.payment.add(newPayment);
+    request.setPayments(payments);
+    return request;
+  }
 }
