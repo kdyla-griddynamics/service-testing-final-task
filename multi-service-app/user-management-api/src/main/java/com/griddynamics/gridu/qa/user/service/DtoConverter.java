@@ -43,7 +43,7 @@ public class DtoConverter {
         UserDetails userDetails = new UserDetails();
         userDetails.setId(userModel.getId());
         userDetails.setName(userModel.getName());
-        userDetails.setLastName(userDetails.getLastName());
+        userDetails.setLastName(userModel.getLastName());
         userDetails.setEmail(userModel.getEmail());
         userDetails.setBirthday(convertDate(userModel.getBirthday()));
 
@@ -100,7 +100,7 @@ public class DtoConverter {
                        .cardNumber(payment.getCardNumber())
                        .cardHolder(payment.getCardholder())
                        .expiryYear(payment.getExpiryYear())
-                       .expiryMonth(payment.getExpiryYear())
+                       .expiryMonth(payment.getExpiryMonth())
                        .cvv(payment.getCvv());
     }
 
