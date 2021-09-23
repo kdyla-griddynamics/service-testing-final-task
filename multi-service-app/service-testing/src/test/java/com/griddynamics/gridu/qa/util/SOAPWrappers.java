@@ -26,6 +26,7 @@ public class SOAPWrappers {
   public static byte[] getCreateUserRequestSOAP(CreateUserRequest request)
       throws ParserConfigurationException, JAXBException, SOAPException, IOException {
     Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+    document.createAttributeNS(ServicesConstants.USER_MANAGEMENT_NAMESPACE, "targetNamespace");
 
     Marshaller marshaller = JAXBContext.newInstance(CreateUserRequest.class).createMarshaller();
     marshaller.marshal(request, document);
