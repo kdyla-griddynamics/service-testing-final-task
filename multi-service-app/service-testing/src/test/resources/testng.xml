@@ -2,9 +2,6 @@
 
 <suite name="UserManagementSuite" parallel="tests" thread-count="2">
   <test name="NoMocks">
-    <parameter name="name" value="Mike"/>
-    <parameter name="lastName" value="Clark"/>
-    <parameter name="email" value="some-email@gmail.com"/>
     <classes>
       <class name="com.griddynamics.gridu.qa.user.CreateUserTest"/>
     </classes>

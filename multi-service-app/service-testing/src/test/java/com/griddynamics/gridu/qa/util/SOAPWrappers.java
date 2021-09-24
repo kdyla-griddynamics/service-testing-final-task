@@ -1,7 +1,5 @@
 package com.griddynamics.gridu.qa.util;
 
-import com.griddynamics.gridu.qa.user.CreateUserRequest;
-import com.griddynamics.gridu.qa.user.CreateUserResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,13 +24,13 @@ public class SOAPWrappers {
 
   private static final Logger logger = Logger.getLogger(SOAPWrappers.class);
 
-  public static byte[] getCreateUserRequestSOAP(CreateUserRequest request) {
+  public static byte[] getSOAPRequestOfGivenType(Class<?> requestClass, Object request) {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     try {
       Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
       document.createAttributeNS(ServicesConstants.USER_MANAGEMENT_NAMESPACE, "targetNamespace");
 
-      Marshaller marshaller = JAXBContext.newInstance(CreateUserRequest.class).createMarshaller();
+      Marshaller marshaller = JAXBContext.newInstance(requestClass).createMarshaller();
       marshaller.marshal(request, document);
 
       SOAPMessage soapMessage = MessageFactory.newInstance().createMessage();
@@ -47,8 +45,8 @@ public class SOAPWrappers {
     return outputStream.toByteArray();
   }
 
-  public static CreateUserResponse extractCreateUserResponse(InputStream responseInputStream) {
-    CreateUserResponse createUserResponse = new CreateUserResponse();
+  public static <T> T extractResponseOfGivenType(InputStream responseInputStream,
+      Class<T> responseClass, String responseLocalName) {
     try {
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       dbf.setNamespaceAware(true);
@@ -57,18 +55,17 @@ public class SOAPWrappers {
       Document d = db.parse(responseInputStream);
       Node createUserResponseNode = d
           .getElementsByTagNameNS(ServicesConstants.USER_MANAGEMENT_NAMESPACE,
-              "createUserResponse").item(0);
+              responseLocalName).item(0);
 
-      JAXBContext jc = JAXBContext.newInstance(CreateUserResponse.class);
+      JAXBContext jc = JAXBContext.newInstance(responseClass);
       Unmarshaller unmarshaller = jc.createUnmarshaller();
-      JAXBElement<CreateUserResponse> createUserResponseJAXBElement = unmarshaller
-          .unmarshal(new DOMSource(createUserResponseNode), CreateUserResponse.class);
-      createUserResponse = createUserResponseJAXBElement.getValue();
-      return createUserResponse;
+      JAXBElement<T> createUserResponseJAXBElement = unmarshaller
+          .unmarshal(new DOMSource(createUserResponseNode), responseClass);
+      return createUserResponseJAXBElement.getValue();
     } catch (IOException | JAXBException | ParserConfigurationException | SAXException exception) {
       logger.error(exception.getMessage());
     }
-    return createUserResponse;
+    throw new IllegalArgumentException("Could not extract the response");
   }
 
 }
