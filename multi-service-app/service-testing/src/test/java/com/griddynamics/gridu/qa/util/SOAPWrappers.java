@@ -17,44 +17,58 @@ import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.transform.dom.DOMSource;
+import org.apache.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public class SOAPWrappers {
 
-  public static byte[] getCreateUserRequestSOAP(CreateUserRequest request)
-      throws ParserConfigurationException, JAXBException, SOAPException, IOException {
-    Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-    document.createAttributeNS(ServicesConstants.USER_MANAGEMENT_NAMESPACE, "targetNamespace");
+  private static final Logger logger = Logger.getLogger(SOAPWrappers.class);
 
-    Marshaller marshaller = JAXBContext.newInstance(CreateUserRequest.class).createMarshaller();
-    marshaller.marshal(request, document);
-
-    SOAPMessage soapMessage = MessageFactory.newInstance().createMessage();
-    soapMessage.getSOAPBody().addDocument(document);
-
+  public static byte[] getCreateUserRequestSOAP(CreateUserRequest request) {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    soapMessage.writeTo(outputStream);
+    try {
+      Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+      document.createAttributeNS(ServicesConstants.USER_MANAGEMENT_NAMESPACE, "targetNamespace");
+
+      Marshaller marshaller = JAXBContext.newInstance(CreateUserRequest.class).createMarshaller();
+      marshaller.marshal(request, document);
+
+      SOAPMessage soapMessage = MessageFactory.newInstance().createMessage();
+      soapMessage.getSOAPBody().addDocument(document);
+
+      outputStream = new ByteArrayOutputStream();
+      soapMessage.writeTo(outputStream);
+      return outputStream.toByteArray();
+    } catch (IOException | JAXBException | ParserConfigurationException | SOAPException exception) {
+      logger.error(exception.getMessage());
+    }
     return outputStream.toByteArray();
   }
 
-  public static CreateUserResponse extractCreateUserResponse(InputStream responseInputStream)
-      throws ParserConfigurationException, IOException, SAXException, JAXBException {
-    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    dbf.setNamespaceAware(true);
-    DocumentBuilder db = dbf.newDocumentBuilder();
+  public static CreateUserResponse extractCreateUserResponse(InputStream responseInputStream) {
+    CreateUserResponse createUserResponse = new CreateUserResponse();
+    try {
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      dbf.setNamespaceAware(true);
+      DocumentBuilder db = dbf.newDocumentBuilder();
 
-    Document d = db.parse(responseInputStream);
-    Node createUserResponseNode = d
-        .getElementsByTagNameNS(ServicesConstants.USER_MANAGEMENT_NAMESPACE,
-            "createUserResponse").item(0);
+      Document d = db.parse(responseInputStream);
+      Node createUserResponseNode = d
+          .getElementsByTagNameNS(ServicesConstants.USER_MANAGEMENT_NAMESPACE,
+              "createUserResponse").item(0);
 
-    JAXBContext jc = JAXBContext.newInstance(CreateUserResponse.class);
-    Unmarshaller unmarshaller = jc.createUnmarshaller();
-    JAXBElement<CreateUserResponse> createUserResponseJAXBElement = unmarshaller
-        .unmarshal(new DOMSource(createUserResponseNode), CreateUserResponse.class);
-    return createUserResponseJAXBElement.getValue();
+      JAXBContext jc = JAXBContext.newInstance(CreateUserResponse.class);
+      Unmarshaller unmarshaller = jc.createUnmarshaller();
+      JAXBElement<CreateUserResponse> createUserResponseJAXBElement = unmarshaller
+          .unmarshal(new DOMSource(createUserResponseNode), CreateUserResponse.class);
+      createUserResponse = createUserResponseJAXBElement.getValue();
+      return createUserResponse;
+    } catch (IOException | JAXBException | ParserConfigurationException | SAXException exception) {
+      logger.error(exception.getMessage());
+    }
+    return createUserResponse;
   }
 
 }

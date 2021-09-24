@@ -10,19 +10,18 @@ import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
 import com.griddynamics.gridu.qa.util.ServicesConstants;
+import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.specification.RequestSpecification;
-import java.io.IOException;
 import java.io.InputStream;
+import java.time.Month;
+import java.time.MonthDay;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.soap.SOAPException;
+import java.util.Random;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-import org.xml.sax.SAXException;
 
 public class CreateUserTest {
 
@@ -33,8 +32,7 @@ public class CreateUserTest {
 
   @Parameters({"name", "lastName", "email"})
   @Test
-  public void createUserRequestShouldReturnResponse(String name, String lastName, String email)
-      throws IOException, ParserConfigurationException, SAXException, JAXBException, SOAPException {
+  public void createUserRequestShouldReturnResponse(String name, String lastName, String email) {
     CreateUserRequest createUserRequest = getCreateUserRequest(name, lastName, email);
 
     InputStream responseInputStream = given(spec)
@@ -59,8 +57,7 @@ public class CreateUserTest {
   @Parameters({"name", "lastName", "email"})
   @Test
   public void createUserRequestWithAddressShouldReturnResponse(String name, String lastName,
-      String email)
-      throws IOException, ParserConfigurationException, SAXException, JAXBException, SOAPException {
+      String email) {
     NewAddress newAddress = new NewAddress();
     newAddress.setZip("08844");
     newAddress.setState(State.CA);
@@ -105,8 +102,7 @@ public class CreateUserTest {
   @Parameters({"name", "lastName", "email"})
   @Test
   public void createUserRequestWithPaymentShouldReturnResponse(String name, String lastName,
-      String email)
-      throws IOException, ParserConfigurationException, SAXException, JAXBException, SOAPException {
+      String email) {
     NewPayment newPayment = new NewPayment();
     newPayment.setCardholder(String.format("%s %s", name, lastName));
     newPayment.setCardNumber(RandomStringUtils.randomNumeric(16));
@@ -149,10 +145,17 @@ public class CreateUserTest {
   }
 
   private CreateUserRequest getCreateUserRequest(String name, String lastName, String email) {
+    XMLGregorianCalendarImpl birthday = new XMLGregorianCalendarImpl();
+    birthday.setDay(MonthDay.now().getDayOfMonth());
+    birthday.setMonth(new Random().nextInt(Month.values().length));
+    birthday.setYear(new Random().nextInt(30) + 1960);
+    birthday.setTimezone(0);
+
     CreateUserRequest request = new CreateUserRequest();
     request.setName(name);
     request.setLastName(lastName);
     request.setEmail(email);
+    request.setBirthday(birthday);
     return request;
   }
 
