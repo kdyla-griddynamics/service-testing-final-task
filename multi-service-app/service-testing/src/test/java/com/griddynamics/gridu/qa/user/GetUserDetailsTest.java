@@ -24,7 +24,7 @@ public class GetUserDetailsTest {
 
     long id = 1;
 
-    GetUserDetailsRequest getUserDetailsRequest = getUserDetailsRequest(id);
+    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(id);
 
     InputStream responseInputStream = given(SPEC)
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
@@ -49,9 +49,7 @@ public class GetUserDetailsTest {
   public void getUserWithNonExistingIdShouldReturnError() {
     logger.info("get user with non-existing id");
 
-    long id = Integer.MAX_VALUE;
-
-    GetUserDetailsRequest getUserDetailsRequest = getUserDetailsRequest(id);
+    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(Integer.MAX_VALUE);
 
     given(SPEC)
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
@@ -61,7 +59,7 @@ public class GetUserDetailsTest {
         .assertThat().statusCode(404);
   }
 
-  private GetUserDetailsRequest getUserDetailsRequest(long id) {
+  private GetUserDetailsRequest getGetUserDetailsRequest(long id) {
     GetUserDetailsRequest request = new GetUserDetailsRequest();
     request.setUserId(id);
     return request;

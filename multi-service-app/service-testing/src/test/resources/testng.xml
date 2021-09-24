@@ -5,6 +5,8 @@
     <classes>
       <class name="com.griddynamics.gridu.qa.user.CreateUserTest"/>
       <class name="com.griddynamics.gridu.qa.user.GetUserDetailsTest"/>
+      <class name="com.griddynamics.gridu.qa.user.UpdateUserTest"/>
+      <class name="com.griddynamics.gridu.qa.user.DeleteUserTest"/>
     </classes>
   </test>
 </suite>
