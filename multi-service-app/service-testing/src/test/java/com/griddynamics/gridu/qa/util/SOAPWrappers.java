@@ -24,7 +24,7 @@ public class SOAPWrappers {
 
   private static final Logger logger = Logger.getLogger(SOAPWrappers.class);
 
-  public static byte[] getSOAPRequestOfGivenType(Class<?> requestClass, Object request) {
+  public static byte[] getRequestOfGivenType(Class<?> requestClass, Object request) {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     try {
       Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();

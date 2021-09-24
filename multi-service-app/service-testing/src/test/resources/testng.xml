@@ -4,6 +4,7 @@
   <test name="NoMocks">
     <classes>
       <class name="com.griddynamics.gridu.qa.user.CreateUserTest"/>
+      <class name="com.griddynamics.gridu.qa.user.GetUserDetailsTest"/>
     </classes>
   </test>
 </suite>

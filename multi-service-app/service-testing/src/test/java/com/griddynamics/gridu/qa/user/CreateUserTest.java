@@ -1,9 +1,9 @@
 package com.griddynamics.gridu.qa.user;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
-import static com.griddynamics.gridu.qa.util.SOAPWrappers.getSOAPRequestOfGivenType;
+import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.CREATE_USER_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.USER_MANAGEMENT_BASE_URI;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.SPEC;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,10 +11,7 @@ import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
-import com.griddynamics.gridu.qa.util.SOAPWrappers;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.specification.RequestSpecification;
 import java.io.InputStream;
 import java.time.MonthDay;
 import java.util.ArrayList;
@@ -30,8 +27,6 @@ import org.testng.annotations.Test;
 public class CreateUserTest {
 
   private static final Logger logger = Logger.getLogger(CreateUserTest.class);
-  private final RequestSpecification spec = new RequestSpecBuilder()
-      .setBaseUri(USER_MANAGEMENT_BASE_URI).setContentType("text/xml").build();
   private final DtoConverter dtoConverter = new DtoConverter();
   private final String firstName = "Mike";
   private final String lastName = "Clark";
@@ -43,11 +38,11 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequest(firstName, lastName, email);
 
-    InputStream responseInputStream = given(spec)
-        .body(getSOAPRequestOfGivenType(CreateUserRequest.class, createUserRequest))
+    InputStream responseInputStream = given(SPEC)
+        .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
-        .then().log().all()
+        .then().log().body()
         .assertThat().statusCode(200)
         .and()
         .extract().asInputStream();
@@ -76,11 +71,11 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(newAddress);
 
-    InputStream responseInputStream = given(spec)
-        .body(getSOAPRequestOfGivenType(CreateUserRequest.class, createUserRequest))
+    InputStream responseInputStream = given(SPEC)
+        .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
-        .then().log().all()
+        .then().log().body()
         .assertThat().statusCode(200)
         .and()
         .extract().asInputStream();
@@ -121,11 +116,11 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithPayment(newPayment);
 
-    InputStream responseInputStream = given(spec)
-        .body(getSOAPRequestOfGivenType(CreateUserRequest.class, createUserRequest))
+    InputStream responseInputStream = given(SPEC)
+        .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
-        .then().log().all()
+        .then().log().body()
         .assertThat().statusCode(200)
         .and()
         .extract().asInputStream();
@@ -158,11 +153,11 @@ public class CreateUserTest {
       CreateUserRequest createUserRequest) {
     logger.info(caseName);
 
-    given(spec)
-        .body(getSOAPRequestOfGivenType(CreateUserRequest.class, createUserRequest))
+    given(SPEC)
+        .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
-        .then().log().all()
+        .then().log().body()
         .assertThat().statusCode(405);
   }
 
