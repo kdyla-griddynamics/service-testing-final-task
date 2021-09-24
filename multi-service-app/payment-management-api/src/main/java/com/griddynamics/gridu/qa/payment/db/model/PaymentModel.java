@@ -22,7 +22,7 @@ public class PaymentModel {
     public static final String FAILED_TOKEN = "FAILED";
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
     @Column(name = "user_id")
     private Long userId;

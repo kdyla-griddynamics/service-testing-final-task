@@ -21,7 +21,7 @@ import javax.persistence.Table;
 public class AddressModel {
 
   @Id
-  @GeneratedValue(strategy= GenerationType.AUTO)
+  @GeneratedValue(strategy= GenerationType.IDENTITY)
   private Long id;
   @Column(name = "user_id")
   private Long userId;
