@@ -1,7 +1,7 @@
 insert into user (id, birthday, email, last_name, name)
-values (1, null, 'example-email1@gmail.com', 'Hofstadter', 'Leonard'),
-       (2, null, 'example-email2@gmail.com', 'Wollowitz', 'Howard'),
-       (3, null, 'example-email3@gmail.com', 'Cooper', 'Sheldon');
+values (1, '1980-04-24', 'example-email1@gmail.com', 'Hofstadter', 'Leonard'),
+       (2, '1981-05-14', 'example-email2@gmail.com', 'Wollowitz', 'Howard'),
+       (3, '1983-01-02', 'example-email3@gmail.com', 'Cooper', 'Sheldon');
 insert into address (id, city, line_one, line_two, state, user_id, zip)
 values (1, 'Pasadena', 'West Boulevard', '123', 'CA', 1, '88040'),
        (2, 'San Francisco', 'Bumpy Road', '1024', 'CA', 2, '89356'),
