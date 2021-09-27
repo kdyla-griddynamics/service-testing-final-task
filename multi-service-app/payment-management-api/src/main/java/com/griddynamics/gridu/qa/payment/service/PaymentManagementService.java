@@ -34,20 +34,20 @@ public class PaymentManagementService {
     }
 
     @Transactional
-    public void updatePaymentsForUser(Long userId, List<PaymentModel> newAddresses) {
+    public void updatePaymentsForUser(Long userId, List<PaymentModel> newPayments) {
         /*  Unlike Address API we can not just remove all payments before adding new (since there's the token generated for them)
             so is better to proceed all payments independently.
         */
         List<PaymentModel> currentPayments = paymentRepository.findPaymentModelByUserId(userId);
         List<PaymentModel> paymentsToRemove
                 = currentPayments.stream()
-                                 .filter(existing -> newAddresses.stream()
+                                 .filter(existing -> newPayments.stream()
                                                                  .anyMatch(paymentModel -> Objects.equals(existing.getId(), paymentModel.getId())))
                                  .collect(Collectors.toList());
         // remove all payments which are not present in the current list
         paymentRepository.deleteAll(paymentsToRemove);
         // all existing payments (having id) should be updated (or not touched if nothing has changed)
-        newAddresses.forEach(paymentModel -> saveIfNewOrChanged(paymentModel, currentPayments));
+        newPayments.forEach(paymentModel -> saveIfNewOrChanged(paymentModel, currentPayments));
     }
 
     public void deleteAllPaymentsForUser(Long userId) {
