@@ -1,24 +1,38 @@
-package com.griddynamics.gridu.qa.user;
+package com.griddynamics.gridu.qa.user.e2e;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.CREATE_USER_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.SPEC;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.griddynamics.gridu.qa.user.CreateUserRequest;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
+import com.griddynamics.gridu.qa.user.CreateUserResponse;
+import com.griddynamics.gridu.qa.user.ExistingAddress;
+import com.griddynamics.gridu.qa.user.ExistingPayment;
+import com.griddynamics.gridu.qa.user.NewAddress;
+import com.griddynamics.gridu.qa.user.NewPayment;
+import com.griddynamics.gridu.qa.user.State;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.time.MonthDay;
-import java.util.ArrayList;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.stream.Stream;
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.testng.annotations.DataProvider;
@@ -38,7 +52,7 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequest(firstName, lastName, email);
 
-    InputStream responseInputStream = given(SPEC)
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -71,7 +85,7 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(newAddress);
 
-    InputStream responseInputStream = given(SPEC)
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -116,7 +130,7 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithPayment(newPayment);
 
-    InputStream responseInputStream = given(SPEC)
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -153,7 +167,7 @@ public class CreateUserTest {
       CreateUserRequest createUserRequest) {
     logger.info(caseName);
 
-    given(SPEC)
+    given(getSpecForPort(DEFAULT_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -175,25 +189,18 @@ public class CreateUserTest {
   }
 
   private CreateUserRequest getCreateUserRequest(String name, String lastName, String email) {
-    XMLGregorianCalendarImpl birthday = new XMLGregorianCalendarImpl();
-    birthday.setDay(MonthDay.now().getDayOfMonth());
-    birthday.setMonth(new Random().nextInt(12) + 1);
-    birthday.setYear(new Random().nextInt(30) + 1960);
-    birthday.setTimezone(0);
-
     CreateUserRequest request = new CreateUserRequest();
     request.setName(name);
     request.setLastName(lastName);
     request.setEmail(email);
-    request.setBirthday(birthday);
+    request.setBirthday(getXMLDate());
     return request;
   }
 
   private CreateUserRequest getCreateUserRequestWithAddress(NewAddress newAddress) {
     CreateUserRequest request = getCreateUserRequest(firstName, lastName, email);
     Addresses addresses = new Addresses();
-    addresses.address = new ArrayList<>();
-    addresses.address.add(newAddress);
+    addresses.getAddress().add(newAddress);
     request.setAddresses(addresses);
     return request;
   }
@@ -201,9 +208,22 @@ public class CreateUserTest {
   private CreateUserRequest getCreateUserRequestWithPayment(NewPayment newPayment) {
     CreateUserRequest request = getCreateUserRequest(firstName, lastName, email);
     Payments payments = new Payments();
-    payments.payment = new ArrayList<>();
-    payments.payment.add(newPayment);
+    payments.getPayment().add(newPayment);
     request.setPayments(payments);
     return request;
+  }
+
+  private XMLGregorianCalendar getXMLDate() {
+    LocalDate birthday = LocalDate.of(new Random().nextInt(30) + 1960, new Random().nextInt(12) + 1,
+        MonthDay.now().getDayOfMonth());
+    GregorianCalendar gregorianDate = GregorianCalendar
+        .from(birthday.atStartOfDay(ZoneId.ofOffset("", ZoneOffset.ofHours(0))));
+    XMLGregorianCalendar xmlGregorianCalendar = null;
+    try {
+      xmlGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianDate);
+    } catch (DatatypeConfigurationException e) {
+      logger.error(e.getMessage());
+    }
+    return xmlGregorianCalendar;
   }
 }

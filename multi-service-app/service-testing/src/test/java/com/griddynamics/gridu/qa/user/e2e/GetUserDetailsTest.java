@@ -1,12 +1,15 @@
-package com.griddynamics.gridu.qa.user;
+package com.griddynamics.gridu.qa.user.e2e;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.SPEC;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.griddynamics.gridu.qa.user.GetUserDetailsRequest;
+import com.griddynamics.gridu.qa.user.GetUserDetailsResponse;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
 import java.io.InputStream;
@@ -26,7 +29,7 @@ public class GetUserDetailsTest {
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(id);
 
-    InputStream responseInputStream = given(SPEC)
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()
@@ -51,7 +54,7 @@ public class GetUserDetailsTest {
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(Integer.MAX_VALUE);
 
-    given(SPEC)
+    given(getSpecForPort(DEFAULT_PORT))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()
