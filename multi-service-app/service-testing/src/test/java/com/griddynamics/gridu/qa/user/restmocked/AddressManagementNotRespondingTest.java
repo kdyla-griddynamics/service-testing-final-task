@@ -26,7 +26,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = "AM mocked")
 public class AddressManagementNotRespondingTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(AddressManagementNotRespondingTest.class);

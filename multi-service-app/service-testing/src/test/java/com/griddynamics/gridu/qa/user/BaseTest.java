@@ -40,7 +40,10 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.testng.annotations.AfterGroups;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeGroups;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Parameters;
 
 public abstract class BaseTest {
 
@@ -51,17 +54,13 @@ public abstract class BaseTest {
   protected WireMockServer wireMockServer;
   private ConfigurableApplicationContext appContext;
 
-  @BeforeGroups(groups = "e2e", alwaysRun = true)
-  public void serviceStartForE2E() {
-    setUpService(DEFAULT_AM_PORT, DEFAULT_PM_PORT);
+  @BeforeSuite(alwaysRun = true)
+  @Parameters({"addressServicePort", "paymentServicePort"})
+  public void serviceStartForE2E(int addressServicePort, int paymentServicePort) {
+    setUpService(addressServicePort, paymentServicePort);
   }
 
-  @BeforeGroups(groups = "AM mocked", alwaysRun = true)
-  public void serviceStartForAMMocked() {
-    setUpService(MOCKED_PORT, DEFAULT_PM_PORT);
-  }
-
-  @AfterGroups(groups = {"e2e", "AM mocked"}, alwaysRun = true)
+  @AfterSuite(alwaysRun = true)
   public void serviceStop() {
     if (appContext != null) {
       appContext.close();

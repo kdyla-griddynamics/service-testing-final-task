@@ -15,7 +15,6 @@ import io.restassured.response.Response;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
-@Test(groups = "e2e")
 public class DeleteUserTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(DeleteUserTest.class);
