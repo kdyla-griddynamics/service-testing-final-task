@@ -5,11 +5,12 @@ import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 
+import com.griddynamics.gridu.qa.user.BaseTest;
 import com.griddynamics.gridu.qa.user.DeleteUserRequest;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
-public class DeleteUserTest {
+public class DeleteUserTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(DeleteUserTest.class);
 
@@ -53,11 +54,5 @@ public class DeleteUserTest {
         .post()
         .then().log().body()
         .assertThat().statusCode(500);
-  }
-
-  private DeleteUserRequest getDeleteUserRequest(long id) {
-    DeleteUserRequest request = new DeleteUserRequest();
-    request.setUserId(id);
-    return request;
   }
 }

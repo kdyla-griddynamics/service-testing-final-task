@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.griddynamics.gridu.qa.user.BaseTest;
 import com.griddynamics.gridu.qa.user.GetUserDetailsRequest;
 import com.griddynamics.gridu.qa.user.GetUserDetailsResponse;
 import com.griddynamics.gridu.qa.user.UserDetails;
@@ -36,16 +37,18 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class AddressManagementNotRespondingTest {
+public class AddressManagementNotRespondingTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(AddressManagementNotRespondingTest.class);
-  private WireMockServer wireMockServer;
+  private static final String ADDRESS_PATH = "/address/([0-9]*)";
   private final DtoConverter dtoConverter = new DtoConverter();
+  private WireMockServer wireMockServer;
 
   @BeforeClass(alwaysRun = true)
   public void serviceStart() throws IOException {
     wireMockServer = new WireMockServer(WireMockConfiguration.options().port(8888));
     wireMockServer.start();
+    createAllStubs();
     logger.info("Wiremock started at port: 8888");
 
     ArrayList<Class<?>> sources = new ArrayList<>();
@@ -74,7 +77,6 @@ public class AddressManagementNotRespondingTest {
   @Test()
   public void getUserDetailsWhenAddressManagementServiceIsDown() {
     logger.info("AM mocked: address not found");
-    createAllStubs();
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(1);
 
@@ -86,7 +88,7 @@ public class AddressManagementNotRespondingTest {
         .assertThat().statusCode(200)
         .and()
         .extract().asInputStream();
-    wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlPathMatching("/address/([0-9]*)")));
+    wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
 
     GetUserDetailsResponse getUserDetailsResponse = extractResponseOfGivenType(responseInputStream,
         GetUserDetailsResponse.class, GET_USER_DETAILS_RESPONSE_LOCALNAME);
@@ -105,20 +107,13 @@ public class AddressManagementNotRespondingTest {
   }
 
   private void createAllStubs() {
-    wireMockServer.stubFor(WireMock.get(WireMock.urlPathMatching("/address/([0-9]*)"))
+    wireMockServer.stubFor(WireMock.get(WireMock.urlPathMatching(ADDRESS_PATH))
         .willReturn(WireMock.aResponse()
             .withStatus(404)
             .withStatusMessage("Address not found - mocked")));
-    wireMockServer.stubFor(WireMock.get(WireMock.urlPathMatching("/payment/([0-9]*)"))
+    wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching(ADDRESS_PATH))
         .willReturn(WireMock.aResponse()
             .withStatus(404)
-            .withStatusMessage("Payment not found - mocked")));
+            .withStatusMessage("Address not found - mocked")));
   }
-
-  private GetUserDetailsRequest getGetUserDetailsRequest(long id) {
-    GetUserDetailsRequest request = new GetUserDetailsRequest();
-    request.setUserId(id);
-    return request;
-  }
-
 }
