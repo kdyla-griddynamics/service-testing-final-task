@@ -13,6 +13,7 @@ import com.griddynamics.gridu.qa.user.UpdateUserRequest;
 import com.griddynamics.gridu.qa.user.UpdateUserResponse;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
+import io.restassured.response.Response;
 import java.io.InputStream;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
@@ -55,11 +56,15 @@ public class UpdateUserTest extends BaseTest {
 
     UpdateUserRequest updateUserRequest = getUpdateUserRequest(Integer.MAX_VALUE);
 
-    given(getSpecForPort(DEFAULT_UM_PORT))
+    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(UpdateUserRequest.class, updateUserRequest))
         .when()
         .post()
         .then().log().body()
-        .assertThat().statusCode(500);
+        .assertThat().statusCode(500)
+        .extract().response();
+
+    String responseFaultMessage = getFaultMessage(response);
+    assertThat(responseFaultMessage).isEqualTo("User with given id does not exist!");
   }
 }

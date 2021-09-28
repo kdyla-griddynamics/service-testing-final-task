@@ -4,6 +4,7 @@ import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGiven
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.MOCKED_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,69 +15,39 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.griddynamics.gridu.qa.user.BaseTest;
 import com.griddynamics.gridu.qa.user.GetUserDetailsRequest;
 import com.griddynamics.gridu.qa.user.GetUserDetailsResponse;
+import com.griddynamics.gridu.qa.user.UpdateUserRequest;
 import com.griddynamics.gridu.qa.user.UserDetails;
-import com.griddynamics.gridu.qa.user.UserManagement;
-import com.griddynamics.gridu.qa.user.config.RestApiClientsConfig;
-import com.griddynamics.gridu.qa.user.config.WebServiceConfig;
-import com.griddynamics.gridu.qa.user.controller.UserEndpoint;
-import com.griddynamics.gridu.qa.user.db.dao.UserRepository;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
-import com.griddynamics.gridu.qa.user.service.UserManagementService;
-import java.io.IOException;
+import io.restassured.response.Response;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Properties;
 import org.apache.log4j.Logger;
-import org.springframework.boot.SpringApplication;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.io.support.ResourcePropertySource;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = "AM mocked")
 public class AddressManagementNotRespondingTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(AddressManagementNotRespondingTest.class);
   private static final String ADDRESS_PATH = "/address/([0-9]*)";
   private final DtoConverter dtoConverter = new DtoConverter();
-  private WireMockServer wireMockServer;
 
   @BeforeClass(alwaysRun = true)
-  public void serviceStartMock() throws IOException {
-    wireMockServer = new WireMockServer(WireMockConfiguration.options().port(8888));
+  public void startWireMock() {
+    wireMockServer = new WireMockServer(WireMockConfiguration.options().port(MOCKED_PORT));
     wireMockServer.start();
     createAllStubs();
-    logger.info("Wiremock started at port: 8888");
+  }
 
-    ArrayList<Class<?>> sources = new ArrayList<>();
-    sources.add(UserManagementService.class);
-    sources.add(UserRepository.class);
-    sources.add(UserEndpoint.class);
-    sources.add(RestApiClientsConfig.class);
-    sources.add(WebServiceConfig.class);
-    final SpringApplication userManagement = new SpringApplication(UserManagement.class);
-    userManagement.addPrimarySources(sources);
-
-    Properties userManagementProperties = new Properties();
-    userManagementProperties.setProperty("address.service.url", "http://localhost:8888");
-    userManagementProperties.setProperty("payment.service.url", "http://localhost:8282");
-
-    final ConfigurableEnvironment env = new StandardEnvironment();
-    env.getPropertySources()
-        .addLast(new ResourcePropertySource("classpath:application-test.properties"));
-    env.getPropertySources()
-        .addLast(new PropertiesPropertySource("serviceProps", userManagementProperties));
-
-    userManagement.setEnvironment(env);
-    userManagement.run();
+  @AfterClass(alwaysRun = true)
+  public void removeStubs() {
+    wireMockServer.resetMappings();
   }
 
   @Test()
   public void getUserDetailsWhenAddressManagementServiceIsDown() {
-    logger.info("AM mocked: address not found");
+    logger.info("AM mocked: address not found. Get User Details");
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(1);
 
@@ -101,9 +72,34 @@ public class AddressManagementNotRespondingTest extends BaseTest {
     assertThat(receivedUserDetails.getPayments().getPayment()).isNotEmpty();
   }
 
-  @AfterClass(alwaysRun = true)
-  public void serviceStop() {
-    wireMockServer.stop();
+  @Test()
+  public void updateUserDetailsWhenAddressManagementServiceIsDown() {
+    logger.info("AM mocked: address not found. Update User");
+
+    long id = 2;
+    UserDetails userDetailsBeforeUpdate = getUserDetailsForGivenId(id);
+
+    UpdateUserRequest updateUserRequest = getUpdateUserRequest(id);
+
+    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
+        .body(getRequestOfGivenType(UpdateUserRequest.class, updateUserRequest))
+        .when()
+        .post()
+        .then().log().all()
+        .assertThat().statusCode(500)
+        .and()
+        .extract().response();
+    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
+
+    String responseFaultMessage = response.xmlPath().getString("Envelope.Body.Fault.faultstring");
+    assertThat(responseFaultMessage).isEqualTo("Can not save user addresses!");
+
+    UserDetails userDetailsAfterUpdate = getUserDetailsForGivenId(id);
+
+    UserModel userModelBeforeUpdate = dtoConverter.convertUserDetails(userDetailsBeforeUpdate);
+    UserModel userModelAfterUpdate = dtoConverter.convertUserDetails(userDetailsAfterUpdate);
+
+    assertThat(userModelAfterUpdate).usingRecursiveComparison().isEqualTo(userModelBeforeUpdate);
   }
 
   private void createAllStubs() {

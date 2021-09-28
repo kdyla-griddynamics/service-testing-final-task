@@ -1,8 +1,16 @@
 package com.griddynamics.gridu.qa.user;
 
+import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
+import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_AM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PM_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.MOCKED_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
+import static io.restassured.RestAssured.given;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
 import com.griddynamics.gridu.qa.user.config.RestApiClientsConfig;
@@ -10,7 +18,9 @@ import com.griddynamics.gridu.qa.user.config.WebServiceConfig;
 import com.griddynamics.gridu.qa.user.controller.UserEndpoint;
 import com.griddynamics.gridu.qa.user.db.dao.UserRepository;
 import com.griddynamics.gridu.qa.user.service.UserManagementService;
+import io.restassured.response.Response;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.ZoneId;
@@ -38,17 +48,26 @@ public abstract class BaseTest {
   protected final String firstName = "Mike";
   protected final String lastName = "Clark";
   protected final String email = "some-email@gmail.com";
+  protected WireMockServer wireMockServer;
   private ConfigurableApplicationContext appContext;
 
   @BeforeGroups(groups = "e2e", alwaysRun = true)
-  public void serviceStart() {
+  public void serviceStartForE2E() {
     setUpService(DEFAULT_AM_PORT, DEFAULT_PM_PORT);
   }
 
-  @AfterGroups(groups = "e2e", alwaysRun = true)
+  @BeforeGroups(groups = "AM mocked", alwaysRun = true)
+  public void serviceStartForAMMocked() {
+    setUpService(MOCKED_PORT, DEFAULT_PM_PORT);
+  }
+
+  @AfterGroups(groups = {"e2e", "AM mocked"}, alwaysRun = true)
   public void serviceStop() {
     if (appContext != null) {
       appContext.close();
+    }
+    if (wireMockServer != null) {
+      wireMockServer.stop();
     }
   }
 
@@ -136,6 +155,26 @@ public abstract class BaseTest {
       logger.error(e.getMessage());
     }
     return xmlGregorianCalendar;
+  }
+
+  protected String getFaultMessage(Response response){
+    return response.xmlPath().getString("Envelope.Body.Fault.faultstring");
+  }
+
+  protected UserDetails getUserDetailsForGivenId(long id) {
+    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(id);
+
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
+        .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
+        .when()
+        .post()
+        .then()
+        .extract().asInputStream();
+
+    GetUserDetailsResponse getUserDetailsResponse = extractResponseOfGivenType(responseInputStream,
+        GetUserDetailsResponse.class, GET_USER_DETAILS_RESPONSE_LOCALNAME);
+
+    return getUserDetailsResponse.getUserDetails();
   }
 
   protected void setUpService(int addressServicePort, int paymentServicePort) {
