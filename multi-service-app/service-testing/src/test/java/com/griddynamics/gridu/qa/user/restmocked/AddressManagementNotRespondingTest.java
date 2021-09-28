@@ -2,8 +2,8 @@ package com.griddynamics.gridu.qa.user.restmocked;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.MOCK_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +45,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
   private WireMockServer wireMockServer;
 
   @BeforeClass(alwaysRun = true)
-  public void serviceStart() throws IOException {
+  public void serviceStartMock() throws IOException {
     wireMockServer = new WireMockServer(WireMockConfiguration.options().port(8888));
     wireMockServer.start();
     createAllStubs();
@@ -80,7 +80,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(1);
 
-    InputStream responseInputStream = given(getSpecForPort(MOCK_PORT))
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()

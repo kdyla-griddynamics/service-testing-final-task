@@ -5,8 +5,10 @@ import io.restassured.specification.RequestSpecification;
 
 public class ServicesConstants {
 
-  public static final int DEFAULT_PORT = 8080;
-  public static final int MOCK_PORT = 8886;
+  public static final int DEFAULT_UM_PORT = 8886;
+  public static final int DEFAULT_AM_PORT = 8181;
+  public static final int DEFAULT_PM_PORT = 8282;
+
   private static final String USER_MANAGEMENT_BASE_URI = "http://localhost:%s/ws/users.wsdl";
   public static final String USER_MANAGEMENT_NAMESPACE = "http://gridu.qa.payment.griddynamics.com/springsoap/gen";
   public static final String CREATE_USER_RESPONSE_LOCALNAME = "createUserResponse";

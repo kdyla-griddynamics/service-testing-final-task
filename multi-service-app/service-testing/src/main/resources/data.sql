@@ -1,6 +1,6 @@
-drop table address;
-drop table payment;
-drop table user;
+drop table if exists address;
+drop table if exists payment;
+drop table if exists user;
 
 create table user
 (

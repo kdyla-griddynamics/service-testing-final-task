@@ -1,18 +1,36 @@
 package com.griddynamics.gridu.qa.user;
 
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_AM_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PM_PORT;
+
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
+import com.griddynamics.gridu.qa.user.config.RestApiClientsConfig;
+import com.griddynamics.gridu.qa.user.config.WebServiceConfig;
+import com.griddynamics.gridu.qa.user.controller.UserEndpoint;
+import com.griddynamics.gridu.qa.user.db.dao.UserRepository;
+import com.griddynamics.gridu.qa.user.service.UserManagementService;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.Properties;
 import java.util.Random;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.support.ResourcePropertySource;
+import org.testng.annotations.AfterGroups;
+import org.testng.annotations.BeforeGroups;
 
 public abstract class BaseTest {
 
@@ -20,6 +38,19 @@ public abstract class BaseTest {
   protected final String firstName = "Mike";
   protected final String lastName = "Clark";
   protected final String email = "some-email@gmail.com";
+  private ConfigurableApplicationContext appContext;
+
+  @BeforeGroups(groups = "e2e", alwaysRun = true)
+  public void serviceStart() {
+    setUpService(DEFAULT_AM_PORT, DEFAULT_PM_PORT);
+  }
+
+  @AfterGroups(groups = "e2e", alwaysRun = true)
+  public void serviceStop() {
+    if (appContext != null) {
+      appContext.close();
+    }
+  }
 
   protected CreateUserRequest getCreateUserRequest(String name, String lastName, String email) {
     CreateUserRequest request = new CreateUserRequest();
@@ -97,7 +128,7 @@ public abstract class BaseTest {
     LocalDate birthday = LocalDate.of(new Random().nextInt(30) + 1960, new Random().nextInt(12) + 1,
         MonthDay.now().getDayOfMonth());
     GregorianCalendar gregorianDate = GregorianCalendar
-        .from(birthday.atStartOfDay(ZoneId.ofOffset("", ZoneOffset.ofHours(0))));
+        .from(birthday.atStartOfDay(ZoneId.systemDefault()));
     XMLGregorianCalendar xmlGregorianCalendar = null;
     try {
       xmlGregorianCalendar = DatatypeFactory.newInstance().newXMLGregorianCalendar(gregorianDate);
@@ -105,6 +136,36 @@ public abstract class BaseTest {
       logger.error(e.getMessage());
     }
     return xmlGregorianCalendar;
+  }
+
+  protected void setUpService(int addressServicePort, int paymentServicePort) {
+    ArrayList<Class<?>> sources = new ArrayList<>();
+    sources.add(UserManagementService.class);
+    sources.add(UserRepository.class);
+    sources.add(UserEndpoint.class);
+    sources.add(RestApiClientsConfig.class);
+    sources.add(WebServiceConfig.class);
+    final SpringApplication userManagement = new SpringApplication(UserManagement.class);
+    userManagement.addPrimarySources(sources);
+
+    Properties userManagementProperties = new Properties();
+    userManagementProperties.setProperty("address.service.url",
+        String.format("http://localhost:%d", addressServicePort));
+    userManagementProperties.setProperty("payment.service.url",
+        String.format("http://localhost:%d", paymentServicePort));
+
+    final ConfigurableEnvironment env = new StandardEnvironment();
+    try {
+      env.getPropertySources()
+          .addLast(new ResourcePropertySource("classpath:application-test.properties"));
+    } catch (IOException ioException) {
+      ioException.printStackTrace();
+    }
+    env.getPropertySources()
+        .addLast(new PropertiesPropertySource("serviceProps", userManagementProperties));
+
+    userManagement.setEnvironment(env);
+    appContext = userManagement.run();
   }
 
 }

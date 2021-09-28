@@ -3,7 +3,7 @@ package com.griddynamics.gridu.qa.user.e2e;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.CREATE_USER_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+@Test(groups = "e2e")
 public class CreateUserTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(CreateUserTest.class);
@@ -38,7 +39,7 @@ public class CreateUserTest extends BaseTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequest(firstName, lastName, email);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -71,7 +72,7 @@ public class CreateUserTest extends BaseTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(newAddress);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -116,7 +117,7 @@ public class CreateUserTest extends BaseTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithPayment(newPayment);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -154,7 +155,7 @@ public class CreateUserTest extends BaseTest {
       CreateUserRequest createUserRequest) {
     logger.info(caseName);
 
-    given(getSpecForPort(DEFAULT_PORT))
+    given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()

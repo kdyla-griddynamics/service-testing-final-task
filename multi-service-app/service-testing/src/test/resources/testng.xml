@@ -2,6 +2,11 @@
 
 <suite name="UserManagementSuite">
   <test name="E2E">
+    <groups>
+      <run>
+        <include name="e2e"/>
+      </run>
+    </groups>
     <classes>
       <class name="com.griddynamics.gridu.qa.user.e2e.CreateUserTest"/>
       <class name="com.griddynamics.gridu.qa.user.e2e.GetUserDetailsTest"/>

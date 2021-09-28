@@ -1,7 +1,7 @@
 package com.griddynamics.gridu.qa.user.e2e;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 
@@ -10,6 +10,7 @@ import com.griddynamics.gridu.qa.user.DeleteUserRequest;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
+@Test(groups = "e2e")
 public class DeleteUserTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(DeleteUserTest.class);
@@ -20,7 +21,7 @@ public class DeleteUserTest extends BaseTest {
 
     DeleteUserRequest deleteUserRequest = getDeleteUserRequest(4);
 
-    given(getSpecForPort(DEFAULT_PORT))
+    given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()
@@ -34,7 +35,7 @@ public class DeleteUserTest extends BaseTest {
 
     DeleteUserRequest deleteUserRequest = getDeleteUserRequest(Integer.MAX_VALUE);
 
-    given(getSpecForPort(DEFAULT_PORT))
+    given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()
@@ -48,7 +49,7 @@ public class DeleteUserTest extends BaseTest {
 
     DeleteUserRequest deleteUserRequest = getDeleteUserRequest(1);
 
-    given(getSpecForPort(DEFAULT_PORT))
+    given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()

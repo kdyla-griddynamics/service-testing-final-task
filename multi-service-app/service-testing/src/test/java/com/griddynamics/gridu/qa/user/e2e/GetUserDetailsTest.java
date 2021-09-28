@@ -2,7 +2,7 @@ package com.griddynamics.gridu.qa.user.e2e;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
@@ -17,6 +17,7 @@ import java.io.InputStream;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
+@Test(groups = "e2e")
 public class GetUserDetailsTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(GetUserDetailsTest.class);
@@ -30,7 +31,7 @@ public class GetUserDetailsTest extends BaseTest {
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(id);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()
@@ -55,7 +56,7 @@ public class GetUserDetailsTest extends BaseTest {
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(Integer.MAX_VALUE);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_PORT))
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()
