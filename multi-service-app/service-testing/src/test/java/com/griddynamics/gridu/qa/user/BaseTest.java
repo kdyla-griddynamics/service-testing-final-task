@@ -2,11 +2,8 @@ package com.griddynamics.gridu.qa.user;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_AM_PORT;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_PM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.MOCKED_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 
@@ -40,9 +37,7 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.testng.annotations.AfterGroups;
-import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeGroups;
-import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 
 public abstract class BaseTest {
@@ -54,13 +49,13 @@ public abstract class BaseTest {
   protected WireMockServer wireMockServer;
   private ConfigurableApplicationContext appContext;
 
-  @BeforeSuite(alwaysRun = true)
+  @BeforeGroups(groups = {"E2E", "AM mocked"}, alwaysRun = true)
   @Parameters({"addressServicePort", "paymentServicePort"})
   public void serviceStartForE2E(int addressServicePort, int paymentServicePort) {
     setUpService(addressServicePort, paymentServicePort);
   }
 
-  @AfterSuite(alwaysRun = true)
+  @AfterGroups(groups = {"E2E", "AM mocked"}, alwaysRun = true)
   public void serviceStop() {
     if (appContext != null) {
       appContext.close();
@@ -144,7 +139,7 @@ public abstract class BaseTest {
 
   protected XMLGregorianCalendar getXMLDate() {
     LocalDate birthday = LocalDate.of(new Random().nextInt(30) + 1960, new Random().nextInt(12) + 1,
-        MonthDay.now().getDayOfMonth());
+        new Random().nextInt(28) + 1);
     GregorianCalendar gregorianDate = GregorianCalendar
         .from(birthday.atStartOfDay(ZoneId.systemDefault()));
     XMLGregorianCalendar xmlGregorianCalendar = null;
@@ -156,7 +151,7 @@ public abstract class BaseTest {
     return xmlGregorianCalendar;
   }
 
-  protected String getFaultMessage(Response response){
+  protected String getFaultMessage(Response response) {
     return response.xmlPath().getString("Envelope.Body.Fault.faultstring");
   }
 

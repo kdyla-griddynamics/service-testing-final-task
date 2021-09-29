@@ -1,9 +1,12 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
 
 <suite name="UserManagementSuite - REST services mocked">
+  <test name="AM mocked">
   <parameter name="addressServicePort" value="8888"/>
   <parameter name="paymentServicePort" value="8282"/>
-  <test name="AM mocked">
+    <groups>
+      <run><include name="AM mocked"/></run>
+    </groups>
     <classes>
       <class name="com.griddynamics.gridu.qa.user.restmocked.AddressManagementNotRespondingTest"/>
     </classes>

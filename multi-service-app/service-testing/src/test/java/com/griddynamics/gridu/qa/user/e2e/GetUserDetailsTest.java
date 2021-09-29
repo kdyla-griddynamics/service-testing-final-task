@@ -17,6 +17,7 @@ import java.io.InputStream;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
+@Test(groups = "E2E")
 public class GetUserDetailsTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(GetUserDetailsTest.class);
