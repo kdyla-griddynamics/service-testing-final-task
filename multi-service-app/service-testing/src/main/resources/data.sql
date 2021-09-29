@@ -1,3 +1,42 @@
+drop table if exists address;
+drop table if exists payment;
+drop table if exists user;
+
+create table user
+(
+    id        bigint auto_increment
+        primary key,
+    birthday  date         null,
+    email     varchar(255) null,
+    last_name varchar(255) null,
+    name      varchar(255) null
+);
+
+create table address
+(
+    id       bigint auto_increment
+        primary key,
+    city     varchar(255) null,
+    line_one varchar(255) null,
+    line_two varchar(255) null,
+    state    varchar(255) null,
+    user_id  bigint       null,
+    zip      varchar(255) null
+);
+
+create table payment
+(
+    id           bigint auto_increment
+        primary key,
+    card_number  varchar(255) null,
+    cardholder   varchar(255) null,
+    cvv          varchar(255) null,
+    expiry_month int          null,
+    expiry_year  int          null,
+    token        varchar(255) null,
+    user_id      bigint       null
+);
+
 insert into user (id, birthday, email, last_name, name)
 values (1, '1980-04-24', 'example-email1@gmail.com', 'Hofstadter', 'Leonard'),
        (2, '1981-05-14', 'example-email2@gmail.com', 'Wollowitz', 'Howard'),
