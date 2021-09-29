@@ -6,8 +6,6 @@ import io.restassured.specification.RequestSpecification;
 public class ServicesConstants {
 
   public static final int DEFAULT_UM_PORT = 8886;
-  public static final int DEFAULT_AM_PORT = 8181;
-  public static final int DEFAULT_PM_PORT = 8282;
   public static final int MOCKED_PORT = 8888;
 
   private static final String USER_MANAGEMENT_BASE_URI = "http://localhost:%s/ws/users.wsdl";
@@ -15,7 +13,6 @@ public class ServicesConstants {
   public static final String CREATE_USER_RESPONSE_LOCALNAME = "createUserResponse";
   public static final String GET_USER_DETAILS_RESPONSE_LOCALNAME = "getUserDetailsResponse";
   public static final String UPDATE_USER_RESPONSE_LOCALNAME = "updateUserResponse";
-  public static final String DELETE_USER_RESPONSE_LOCALNAME = "deleteUserResponse";
 
   public static RequestSpecification getSpecForPort(int portNumber) {
     return new RequestSpecBuilder()

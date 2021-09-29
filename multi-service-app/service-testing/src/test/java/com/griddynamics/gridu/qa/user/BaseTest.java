@@ -19,7 +19,6 @@ import io.restassured.response.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.time.MonthDay;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -37,7 +36,9 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.testng.annotations.AfterGroups;
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeGroups;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 
 public abstract class BaseTest {
@@ -49,13 +50,13 @@ public abstract class BaseTest {
   protected WireMockServer wireMockServer;
   private ConfigurableApplicationContext appContext;
 
-  @BeforeGroups(groups = {"E2E", "AM mocked"}, alwaysRun = true)
+  @BeforeSuite(alwaysRun = true)
   @Parameters({"addressServicePort", "paymentServicePort"})
   public void serviceStartForE2E(int addressServicePort, int paymentServicePort) {
     setUpService(addressServicePort, paymentServicePort);
   }
 
-  @AfterGroups(groups = {"E2E", "AM mocked"}, alwaysRun = true)
+  @AfterSuite(alwaysRun = true)
   public void serviceStop() {
     if (appContext != null) {
       appContext.close();
@@ -70,7 +71,7 @@ public abstract class BaseTest {
     request.setName(name);
     request.setLastName(lastName);
     request.setEmail(email);
-    request.setBirthday(getXMLDate());
+    request.setBirthday(createXMLDate());
     return request;
   }
 
@@ -111,7 +112,7 @@ public abstract class BaseTest {
     userDetailsForUpdate.setLastName(lastName);
     String email = "usome-email@gmail.com";
     userDetailsForUpdate.setEmail(email);
-    userDetailsForUpdate.setBirthday(getXMLDate());
+    userDetailsForUpdate.setBirthday(createXMLDate());
     ExistingAddress updatedAddress = new ExistingAddress();
     updatedAddress.setId(id);
     updatedAddress.setZip("08844");
@@ -137,7 +138,27 @@ public abstract class BaseTest {
     return request;
   }
 
-  protected XMLGregorianCalendar getXMLDate() {
+  protected NewAddress createNewAddress(){
+    NewAddress newAddress = new NewAddress();
+    newAddress.setZip("08844");
+    newAddress.setState(State.CA);
+    newAddress.setCity("Milpitas");
+    newAddress.setLine1("620 N. McCarthy Boulevard");
+    newAddress.setLine2("Orange County");
+    return newAddress;
+  }
+
+  protected NewPayment createNewPayment(){
+    NewPayment newPayment = new NewPayment();
+    newPayment.setCardholder(String.format("%s %s", firstName, lastName));
+    newPayment.setCardNumber(RandomStringUtils.randomNumeric(16));
+    newPayment.setCvv(RandomStringUtils.randomNumeric(3));
+    newPayment.setExpiryMonth(4);
+    newPayment.setExpiryYear(2023);
+    return newPayment;
+  }
+
+  protected XMLGregorianCalendar createXMLDate() {
     LocalDate birthday = LocalDate.of(new Random().nextInt(30) + 1960, new Random().nextInt(12) + 1,
         new Random().nextInt(28) + 1);
     GregorianCalendar gregorianDate = GregorianCalendar

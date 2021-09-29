@@ -15,7 +15,6 @@ import io.restassured.response.Response;
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
 
-@Test(groups = "E2E")
 public class DeleteUserTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(DeleteUserTest.class);
@@ -51,7 +50,7 @@ public class DeleteUserTest extends BaseTest {
 
     DeleteUserRequest deleteUserRequest = getDeleteUserRequest(Integer.MAX_VALUE);
 
-    Response response  = given(getSpecForPort(DEFAULT_UM_PORT))
+    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()
@@ -67,7 +66,10 @@ public class DeleteUserTest extends BaseTest {
   public void deleteUserWithAddressOrPaymentShouldReturnError() {
     logger.info("cannot delete user with address or payment");
 
-    DeleteUserRequest deleteUserRequest = getDeleteUserRequest(1);
+    long id = 1;
+
+    UserDetails userDetailsBeforeDeletion = getUserDetailsForGivenId(id);
+    DeleteUserRequest deleteUserRequest = getDeleteUserRequest(id);
 
     Response response = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
@@ -79,5 +81,10 @@ public class DeleteUserTest extends BaseTest {
 
     String responseFaultMessage = getFaultMessage(response);
     assertThat(responseFaultMessage).isEqualTo("Can not delete user's payments and/or addresses");
+
+    UserDetails userDetailsAfterDeletion = getUserDetailsForGivenId(id);
+
+    assertThat(userDetailsAfterDeletion).usingRecursiveComparison()
+        .isEqualTo(userDetailsBeforeDeletion);
   }
 }

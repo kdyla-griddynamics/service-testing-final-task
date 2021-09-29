@@ -28,10 +28,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class AddressManagementNotRespondingTest extends BaseTest {
+public class PaymentManagementNotRespondingTest extends BaseTest {
 
-  private static final Logger logger = Logger.getLogger(AddressManagementNotRespondingTest.class);
-  private static final String ADDRESS_PATH = "/address/([0-9]*)";
+  private static final Logger logger = Logger.getLogger(PaymentManagementNotRespondingTest.class);
+  private static final String PAYMENT_PATH = "/payment/([0-9]*)";
   private final DtoConverter dtoConverter = new DtoConverter();
 
   @BeforeClass(alwaysRun = true)
@@ -47,8 +47,8 @@ public class AddressManagementNotRespondingTest extends BaseTest {
   }
 
   @Test()
-  public void getUserDetailsWhenAddressManagementServiceIsDown() {
-    logger.info("AM mocked: address not found. Get User Details");
+  public void getUserDetailsWhenPaymentManagementServiceIsDown() {
+    logger.info("PM mocked: payment not found. Get User Details");
 
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(1);
 
@@ -60,7 +60,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(200)
         .and()
         .extract().asInputStream();
-    wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
+    wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlPathMatching(PAYMENT_PATH)));
 
     GetUserDetailsResponse getUserDetailsResponse = extractResponseOfGivenType(responseInputStream,
         GetUserDetailsResponse.class, GET_USER_DETAILS_RESPONSE_LOCALNAME);
@@ -69,15 +69,15 @@ public class AddressManagementNotRespondingTest extends BaseTest {
     UserModel receivedUserModel = dtoConverter.convertUserDetails(receivedUserDetails);
 
     assertThat(receivedUserModel).hasNoNullFieldsOrProperties();
-    assertThat(receivedUserDetails.getAddresses().getAddress()).isEmpty();
-    assertThat(receivedUserDetails.getPayments().getPayment()).isNotEmpty();
+    assertThat(receivedUserDetails.getAddresses().getAddress()).isNotEmpty();
+    assertThat(receivedUserDetails.getPayments().getPayment()).isEmpty();
   }
 
   @Test()
-  public void createUserWhenAddressManagementServiceIsDown() {
-    logger.info("AM mocked: address not found. Create User");
+  public void createUserWhenPaymentManagementServiceIsDown() {
+    logger.info("PM mocked: payment not found. Create User");
 
-    CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(createNewAddress());
+    CreateUserRequest createUserRequest = getCreateUserRequestWithPayment(createNewPayment());
 
     Response response = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
@@ -87,15 +87,15 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(500)
         .and()
         .extract().response();
-    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
+    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(PAYMENT_PATH)));
 
     String responseFaultMessage = response.xmlPath().getString("Envelope.Body.Fault.faultstring");
-    assertThat(responseFaultMessage).isEqualTo("Can not save user addresses!");
+    assertThat(responseFaultMessage).isEqualTo("Can not save user payments!");
   }
 
   @Test()
-  public void updateUserWhenAddressManagementServiceIsDown() {
-    logger.info("AM mocked: address not found. Update User");
+  public void updateUserWhenPaymentManagementServiceIsDown() {
+    logger.info("PM mocked: payment not found. Update User");
 
     long id = 2;
     UserDetails userDetailsBeforeUpdate = getUserDetailsForGivenId(id);
@@ -110,10 +110,10 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(500)
         .and()
         .extract().response();
-    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
+    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(PAYMENT_PATH)));
 
     String responseFaultMessage = response.xmlPath().getString("Envelope.Body.Fault.faultstring");
-    assertThat(responseFaultMessage).isEqualTo("Can not save user addresses!");
+    assertThat(responseFaultMessage).isEqualTo("Can not save user payments!");
 
     UserDetails userDetailsAfterUpdate = getUserDetailsForGivenId(id);
 
@@ -124,8 +124,8 @@ public class AddressManagementNotRespondingTest extends BaseTest {
   }
 
   @Test()
-  public void deleteUserWhenAddressManagementServiceIsDown() {
-    logger.info("AM mocked: address not found. Delete User");
+  public void deleteUserWhenPaymentManagementServiceIsDown() {
+    logger.info("PM mocked: payment not found. Delete User");
 
     long id = 1;
 
@@ -140,7 +140,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(500)
         .and()
         .extract().response();
-    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
+    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(PAYMENT_PATH)));
 
     String responseFaultMessage = response.xmlPath().getString("Envelope.Body.Fault.faultstring");
     assertThat(responseFaultMessage).isEqualTo("Can not delete user's payments and/or addresses");
@@ -152,13 +152,13 @@ public class AddressManagementNotRespondingTest extends BaseTest {
   }
 
   private void createAllStubs() {
-    wireMockServer.stubFor(WireMock.get(WireMock.urlPathMatching(ADDRESS_PATH))
+    wireMockServer.stubFor(WireMock.get(WireMock.urlPathMatching(PAYMENT_PATH))
         .willReturn(WireMock.aResponse()
             .withStatus(404)
-            .withStatusMessage("Address not found - mocked")));
-    wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching(ADDRESS_PATH))
+            .withStatusMessage("Payment not found - mocked")));
+    wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching(PAYMENT_PATH))
         .willReturn(WireMock.aResponse()
             .withStatus(404)
-            .withStatusMessage("Address not found - mocked")));
+            .withStatusMessage("Payment not found - mocked")));
   }
 }
