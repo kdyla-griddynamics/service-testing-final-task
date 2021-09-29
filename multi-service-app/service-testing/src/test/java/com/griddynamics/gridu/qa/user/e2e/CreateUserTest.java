@@ -1,36 +1,36 @@
-package com.griddynamics.gridu.qa.user;
+package com.griddynamics.gridu.qa.user.e2e;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.CREATE_USER_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.SPEC;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
-import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
+import com.griddynamics.gridu.qa.user.BaseTest;
+import com.griddynamics.gridu.qa.user.CreateUserRequest;
+import com.griddynamics.gridu.qa.user.CreateUserResponse;
+import com.griddynamics.gridu.qa.user.ExistingAddress;
+import com.griddynamics.gridu.qa.user.ExistingPayment;
+import com.griddynamics.gridu.qa.user.NewAddress;
+import com.griddynamics.gridu.qa.user.NewPayment;
+import com.griddynamics.gridu.qa.user.State;
 import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
-import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import java.io.InputStream;
-import java.time.MonthDay;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Random;
 import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class CreateUserTest {
+public class CreateUserTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(CreateUserTest.class);
   private final DtoConverter dtoConverter = new DtoConverter();
-  private final String firstName = "Mike";
-  private final String lastName = "Clark";
-  private final String email = "some-email@gmail.com";
 
   @Test
   public void createUserRequestShouldReturnResponse() {
@@ -38,7 +38,7 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequest(firstName, lastName, email);
 
-    InputStream responseInputStream = given(SPEC)
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -71,7 +71,7 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(newAddress);
 
-    InputStream responseInputStream = given(SPEC)
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -116,7 +116,7 @@ public class CreateUserTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithPayment(newPayment);
 
-    InputStream responseInputStream = given(SPEC)
+    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -132,6 +132,7 @@ public class CreateUserTest {
 
     ExistingPayment existingPayment = createUserResponse.getUserDetails().getPayments().getPayment()
         .stream()
+        .filter(payment -> payment.getCvv().equals(newPayment.getCvv()))
         .findFirst()
         .orElseThrow(NoSuchElementException::new);
 
@@ -153,7 +154,7 @@ public class CreateUserTest {
       CreateUserRequest createUserRequest) {
     logger.info(caseName);
 
-    given(SPEC)
+    given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -172,38 +173,5 @@ public class CreateUserTest {
             getCreateUserRequest(firstName, lastName, null)})
         .iterator();
 
-  }
-
-  private CreateUserRequest getCreateUserRequest(String name, String lastName, String email) {
-    XMLGregorianCalendarImpl birthday = new XMLGregorianCalendarImpl();
-    birthday.setDay(MonthDay.now().getDayOfMonth());
-    birthday.setMonth(new Random().nextInt(12) + 1);
-    birthday.setYear(new Random().nextInt(30) + 1960);
-    birthday.setTimezone(0);
-
-    CreateUserRequest request = new CreateUserRequest();
-    request.setName(name);
-    request.setLastName(lastName);
-    request.setEmail(email);
-    request.setBirthday(birthday);
-    return request;
-  }
-
-  private CreateUserRequest getCreateUserRequestWithAddress(NewAddress newAddress) {
-    CreateUserRequest request = getCreateUserRequest(firstName, lastName, email);
-    Addresses addresses = new Addresses();
-    addresses.address = new ArrayList<>();
-    addresses.address.add(newAddress);
-    request.setAddresses(addresses);
-    return request;
-  }
-
-  private CreateUserRequest getCreateUserRequestWithPayment(NewPayment newPayment) {
-    CreateUserRequest request = getCreateUserRequest(firstName, lastName, email);
-    Payments payments = new Payments();
-    payments.payment = new ArrayList<>();
-    payments.payment.add(newPayment);
-    request.setPayments(payments);
-    return request;
   }
 }

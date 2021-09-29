@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
+
+<suite name="UserManagementSuite">
+  <parameter name="addressServicePort" value="8181"/>
+  <parameter name="paymentServicePort" value="8282"/>
+  <test name="E2E">
+    <classes>
+      <class name="com.griddynamics.gridu.qa.user.e2e.CreateUserTest"/>
+      <class name="com.griddynamics.gridu.qa.user.e2e.GetUserDetailsTest"/>
+      <class name="com.griddynamics.gridu.qa.user.e2e.UpdateUserTest"/>
+      <class name="com.griddynamics.gridu.qa.user.e2e.DeleteUserTest"/>
+    </classes>
+  </test>
+</suite>
