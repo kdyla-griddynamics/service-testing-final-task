@@ -84,7 +84,10 @@ public class DeleteUserTest extends BaseTest {
 
     UserDetails userDetailsAfterDeletion = getUserDetailsForGivenId(id);
 
-    assertThat(userDetailsAfterDeletion).usingRecursiveComparison()
-        .isEqualTo(userDetailsBeforeDeletion);
+    UserModel userModelBeforeDeletion = dtoConverter.convertUserDetails(userDetailsBeforeDeletion);
+    UserModel userModelAfterDeletion = dtoConverter.convertUserDetails(userDetailsAfterDeletion);
+
+    assertThat(userModelAfterDeletion).usingRecursiveComparison()
+        .isEqualTo(userModelBeforeDeletion);
   }
 }

@@ -12,8 +12,9 @@
   <artifactId>service-testing</artifactId>
 
   <properties>
-    <maven.compiler.source>8</maven.compiler.source>
-    <maven.compiler.target>8</maven.compiler.target>
+    <maven.compiler.source>13</maven.compiler.source>
+    <maven.compiler.target>13</maven.compiler.target>
+    <aspectj.version>1.8.10</aspectj.version>
   </properties>
   <dependencies>
     <dependency>
@@ -38,6 +39,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>io.qameta.allure</groupId>
+      <artifactId>allure-testng</artifactId>
+      <version>2.15.0</version>
+    </dependency>
+    <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <version>4.4.0</version>
@@ -58,6 +64,34 @@
       <version>3.21.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>5.2.10.RELEASE</version>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M5</version>
+        <configuration>
+          <suiteXmlFiles>
+            <suiteXmlFile>
+              src/test/resources/e2e_testng.xml
+            </suiteXmlFile>
+            <suiteXmlFile>
+              src/test/resources/mock_am_testng.xml
+            </suiteXmlFile>
+            <suiteXmlFile>
+              src/test/resources/mock_pm_testng.xml
+            </suiteXmlFile>
+          </suiteXmlFiles>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
