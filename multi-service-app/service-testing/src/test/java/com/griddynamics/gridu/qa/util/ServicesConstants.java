@@ -20,4 +20,6 @@ public class ServicesConstants {
         .build();
   }
 
+  private ServicesConstants(){}
+
 }

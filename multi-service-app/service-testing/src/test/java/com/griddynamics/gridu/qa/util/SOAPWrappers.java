@@ -68,4 +68,6 @@ public class SOAPWrappers {
     throw new IllegalArgumentException("Could not extract the response");
   }
 
+  private SOAPWrappers(){}
+
 }
