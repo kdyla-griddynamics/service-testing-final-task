@@ -1,6 +1,6 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
 
-<suite name="UserManagementSuite - REST services mocked">
+<suite name="UserManagement - PM service mocked">
     <parameter name="addressServicePort" value="8181"/>
     <parameter name="paymentServicePort" value="8888"/>
   <test name="PM mocked">

@@ -35,9 +35,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.support.ResourcePropertySource;
-import org.testng.annotations.AfterGroups;
 import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 
@@ -138,7 +136,7 @@ public abstract class BaseTest {
     return request;
   }
 
-  protected NewAddress createNewAddress(){
+  protected NewAddress createNewAddress() {
     NewAddress newAddress = new NewAddress();
     newAddress.setZip("08844");
     newAddress.setState(State.CA);
@@ -148,7 +146,7 @@ public abstract class BaseTest {
     return newAddress;
   }
 
-  protected NewPayment createNewPayment(){
+  protected NewPayment createNewPayment() {
     NewPayment newPayment = new NewPayment();
     newPayment.setCardholder(String.format("%s %s", firstName, lastName));
     newPayment.setCardNumber(RandomStringUtils.randomNumeric(16));
