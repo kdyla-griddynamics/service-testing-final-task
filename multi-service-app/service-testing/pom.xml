@@ -14,7 +14,6 @@
   <properties>
     <maven.compiler.source>13</maven.compiler.source>
     <maven.compiler.target>13</maven.compiler.target>
-    <aspectj.version>1.8.10</aspectj.version>
   </properties>
   <dependencies>
     <dependency>
