@@ -1,9 +1,0 @@
-<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
-
-<suite name="Payment Management">
-  <test name="Payment Gateway mocked">
-    <classes>
-      <class name="com.griddynamics.gridu.qa.payment.PaymentApiTest"/>
-    </classes>
-  </test>
-</suite>
