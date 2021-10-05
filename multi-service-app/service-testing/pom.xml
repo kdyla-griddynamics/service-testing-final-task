@@ -109,10 +109,7 @@
               src/test/resources/e2e_testng.xml
             </suiteXmlFile>
             <suiteXmlFile>
-              src/test/resources/mock_am_testng.xml
-            </suiteXmlFile>
-            <suiteXmlFile>
-              src/test/resources/mock_pm_testng.xml
+              src/test/resources/mock_services_testng.xml
             </suiteXmlFile>
           </suiteXmlFiles>
           <testFailureIgnore>true</testFailureIgnore>
