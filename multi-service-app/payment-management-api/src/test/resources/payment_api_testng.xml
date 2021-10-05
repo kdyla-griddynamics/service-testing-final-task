@@ -4,6 +4,9 @@
   <test name="REST test with payment gateway mocked">
     <classes>
       <class name="com.griddynamics.gridu.qa.payment.CreatePaymentTest"/>
+      <class name="com.griddynamics.gridu.qa.payment.UpdatePaymentTest"/>
+      <class name="com.griddynamics.gridu.qa.payment.GetPaymentTest"/>
+      <class name="com.griddynamics.gridu.qa.payment.DeletePaymentTest"/>
     </classes>
   </test>
 </suite>

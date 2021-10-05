@@ -12,11 +12,14 @@ import com.griddynamics.gridu.qa.payment.api.model.Payment;
 import com.griddynamics.gridu.qa.payment.db.model.PaymentModel;
 import com.griddynamics.gridu.qa.payment.service.DtoConverter;
 import io.restassured.response.Response;
+import org.apache.log4j.Logger;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.testng.annotations.Test;
 
 public class CreatePaymentTest extends PaymentApiBaseTest {
+
+  private static final Logger logger = Logger.getLogger(CreatePaymentTest.class);
 
   @MockBean
   private CardApi cardApi;
@@ -24,7 +27,8 @@ public class CreatePaymentTest extends PaymentApiBaseTest {
   private final DtoConverter dtoConverter = new DtoConverter();
 
   @Test
-  public void canCreatePayment() throws ApiException {
+  public void canCreateCorrectPayment() throws ApiException {
+    logger.info("Create correct payment with mocked token");
 
     Payment paymentToCreate = new Payment();
     paymentToCreate.setUserId(1L);
@@ -57,6 +61,42 @@ public class CreatePaymentTest extends PaymentApiBaseTest {
         .isEqualTo(paymentToCreate);
 
     assertThat(paymentFromResponse.getVerified()).isTrue();
+  }
+
+  @Test
+  public void cannotCreateIncorrectPayment() throws ApiException {
+    logger.info("Create empty payment with mocked token");
+
+    Payment emptyPayment = new Payment();
+    PaymentModel paymentModel = dtoConverter.convertFrom(emptyPayment);
+    Card card = dtoConverter.convertToCard(paymentModel);
+
+    Mockito.when(cardApi.verifyCard(card)).thenReturn(PaymentModel.FAILED_TOKEN);
+
+    given().spec(getSpecForPort(appPort))
+        .body(emptyPayment)
+        .log().all()
+        .when()
+        .post(PAYMENT_PATH)
+        .then().log().all()
+        .assertThat().statusCode(405);
+
+    Mockito.verify(cardApi, Mockito.times(1)).verifyCard(card);
+  }
+
+  @Test
+  public void createPaymentRequestWithoutBodyShouldReturnException() throws ApiException {
+    logger.info("Create payment request without body should throw API Exception");
+
+    Mockito.when(cardApi.verifyCard(null)).thenThrow(ApiException.class);
+
+    given().spec(getSpecForPort(appPort))
+        .log().all()
+        .when()
+        .post(PAYMENT_PATH)
+        .then().log().all();
+
+    Mockito.verify(cardApi, Mockito.times(1)).verifyCard(new Card());
   }
 
 }

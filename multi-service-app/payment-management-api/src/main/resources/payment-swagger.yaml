@@ -136,6 +136,9 @@ paths:
             format: int64
             minimum: 1
       responses:
+        204:
+          description: Delete operation successful
+          content: {}
         400:
           description: Invalid ID supplied
           content: {}

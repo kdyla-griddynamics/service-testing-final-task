@@ -50,6 +50,7 @@ public class PaymentManagementService {
         newPayments.forEach(paymentModel -> saveIfNewOrChanged(paymentModel, currentPayments));
     }
 
+    @Transactional
     public void deleteAllPaymentsForUser(Long userId) {
         paymentRepository.deletePaymentModelByUserId(userId);
     }
