@@ -11,23 +11,37 @@ TODO:
 To start the app (all services + DB + stub) use Docker-Compose w/o any parameters specified 
 (assuming you are at the project root folder):<br/>
 ```
-mvn clean install
+mvn clean install -DskipTests
 docker-compose up
 ```
 
-In order to start only single (or just not all) component(s) you could list all required 
+In order to start only single (or just not all) component(s) you could list all required
 components as parameters for docker-compose command. E.g. start w/o stub:<br/>
 ```docker-compose up mysql-docker-container stub am pm um```
 
-For User Management API testing (client generation) you could use the service WSDL available under http://localhost:8080/ws/users.wsdl <br/><br/> 
-All components could be also easily started right from your IDE 
-(by running corresponding 'main' classes). For DB variables (used in default properties file) 
-you need to specify proper values (same as in the db_variables.env file if you are using MySql container created 
+For User Management API testing (client generation) you could use the service WSDL available under http://localhost:8080/ws/users.wsdl <br/><br/>
+All components could be also easily started right from your IDE
+(by running corresponding 'main' classes). For DB variables (used in default properties file)
+you need to specify proper values (same as in the db_variables.env file if you are using MySql container created
 by this project's Docker-Compose execution).<br/>
 Variables are: *MYSQL_HOST*, *MYSQL_PORT*, *MYSQL_DATABASE*, *MYSQL_USER*, *MYSQL_PASSWORD*<br/>
 In addition to this, update *payment.service.url*, *address.service.url* and *payment.gateway.url* environment variables.<br/>
-You should also add generated (by Swagger) classes into IDEA 
+You should also add generated (by Swagger) classes into IDEA
 (by marking corresponding "main" directories as "Generated sources root"):
 
 ![generated_resources.png](generated_resources.png)
+
+# Service Testing course final task
+
+To start tests for tasks 1 and 2 and generate allure report, go to service-testing module directory and run:<br/>
+```
+mvn clean install
+mvn allure:serve
+```
+
+To start tests for task 3 and generate allure report, go to payment-management-api module directory and run:<br/>
+```
+mvn clean install
+mvn allure:serve
+```
 
