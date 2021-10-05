@@ -19,21 +19,27 @@
   <profiles>
     <profile>
       <id>um-test</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
       <dependencies>
         <dependency>
           <groupId>com.griddynamics.gridu.qa</groupId>
           <artifactId>user-management-api</artifactId>
           <version>1.0-SNAPSHOT</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>com.griddynamics.gridu.qa</groupId>
           <artifactId>payment-management-api</artifactId>
           <version>1.0-SNAPSHOT</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>com.griddynamics.gridu.qa</groupId>
           <artifactId>address-management-api</artifactId>
           <version>1.0-SNAPSHOT</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
       <build>
@@ -46,9 +52,6 @@
           <suiteXmlFiles>
             <suiteXmlFile>
               src/test/resources/e2e_testng.xml
-            </suiteXmlFile>
-            <suiteXmlFile>
-              src/test/resources/mock_services_testng.xml
             </suiteXmlFile>
           </suiteXmlFiles>
           <testFailureIgnore>true</testFailureIgnore>
@@ -64,16 +67,19 @@
           <groupId>com.griddynamics.gridu.qa</groupId>
           <artifactId>payment-management-api</artifactId>
           <version>1.0-SNAPSHOT</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>com.griddynamics.gridu.qa</groupId>
           <artifactId>user-management-api</artifactId>
           <version>1.0-SNAPSHOT</version>
+          <scope>provided</scope>
         </dependency>
         <dependency>
           <groupId>com.griddynamics.gridu.qa</groupId>
           <artifactId>address-management-api</artifactId>
           <version>1.0-SNAPSHOT</version>
+          <scope>provided</scope>
         </dependency>
       </dependencies>
       <build>

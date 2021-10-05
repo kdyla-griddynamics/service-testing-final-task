@@ -9,4 +9,14 @@
       <class name="com.griddynamics.gridu.qa.user.e2e.DeleteUserTest"/>
     </classes>
   </test>
+  <test name="AM mocked">
+    <classes>
+      <class name="com.griddynamics.gridu.qa.user.restmocked.AddressManagementNotRespondingTest"/>
+    </classes>
+  </test>
+  <test name="PM mocked">
+    <classes>
+      <class name="com.griddynamics.gridu.qa.user.restmocked.PaymentManagementNotRespondingTest"/>
+    </classes>
+  </test>
 </suite>
