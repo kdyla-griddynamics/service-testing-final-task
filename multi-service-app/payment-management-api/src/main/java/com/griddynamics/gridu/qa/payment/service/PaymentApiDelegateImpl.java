@@ -30,7 +30,7 @@ public class PaymentApiDelegateImpl implements PaymentApiDelegate {
         // TODO base validator + check for existing ID
         PaymentModel paymentModel = dtoConverter.convertFrom(payment);
         paymentModel = paymentManagementService.saveOrUpdatePayment(paymentModel);
-        return new ResponseEntity<>(dtoConverter.convertTo(paymentModel), HttpStatus.CREATED);
+        return new ResponseEntity<>(dtoConverter.convertTo(paymentModel), HttpStatus.OK);
     }
 
     @Override
