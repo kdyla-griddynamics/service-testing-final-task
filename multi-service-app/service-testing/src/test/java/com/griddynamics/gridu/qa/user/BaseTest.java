@@ -2,7 +2,6 @@ package com.griddynamics.gridu.qa.user;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
@@ -10,59 +9,39 @@ import static io.restassured.RestAssured.given;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
-import com.griddynamics.gridu.qa.user.config.RestApiClientsConfig;
-import com.griddynamics.gridu.qa.user.config.WebServiceConfig;
-import com.griddynamics.gridu.qa.user.controller.UserEndpoint;
-import com.griddynamics.gridu.qa.user.db.dao.UserRepository;
-import com.griddynamics.gridu.qa.user.service.UserManagementService;
 import io.restassured.response.Response;
-import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.GregorianCalendar;
-import java.util.Properties;
 import java.util.Random;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.core.io.support.ResourcePropertySource;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Parameters;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 
-public abstract class BaseTest {
+@SpringBootTest(classes = UserManagement.class,
+    webEnvironment = WebEnvironment.RANDOM_PORT)
+@TestExecutionListeners(MockitoTestExecutionListener.class)
+@TestPropertySource("classpath:application-test.properties")
+public abstract class BaseTest extends AbstractTestNGSpringContextTests {
+
+  @LocalServerPort
+  protected int appPort;
 
   private static final Logger logger = Logger.getLogger(BaseTest.class);
   protected final String firstName = "Mike";
   protected final String lastName = "Clark";
   protected final String email = "some-email@gmail.com";
   protected WireMockServer wireMockServer;
-  private ConfigurableApplicationContext appContext;
-
-  @BeforeSuite(alwaysRun = true)
-  @Parameters({"addressServicePort", "paymentServicePort"})
-  public void serviceStartForE2E(int addressServicePort, int paymentServicePort) {
-    setUpService(addressServicePort, paymentServicePort);
-  }
-
-  @AfterSuite(alwaysRun = true)
-  public void serviceStop() {
-    if (appContext != null) {
-      appContext.close();
-    }
-    if (wireMockServer != null) {
-      wireMockServer.stop();
-    }
-  }
 
   protected CreateUserRequest getCreateUserRequest(String name, String lastName, String email) {
     CreateUserRequest request = new CreateUserRequest();
@@ -177,7 +156,7 @@ public abstract class BaseTest {
   protected UserDetails getUserDetailsForGivenId(long id) {
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(id);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
+    InputStream responseInputStream = given(getSpecForPort(appPort))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()
@@ -188,36 +167,6 @@ public abstract class BaseTest {
         GetUserDetailsResponse.class, GET_USER_DETAILS_RESPONSE_LOCALNAME);
 
     return getUserDetailsResponse.getUserDetails();
-  }
-
-  protected void setUpService(int addressServicePort, int paymentServicePort) {
-    ArrayList<Class<?>> sources = new ArrayList<>();
-    sources.add(UserManagementService.class);
-    sources.add(UserRepository.class);
-    sources.add(UserEndpoint.class);
-    sources.add(RestApiClientsConfig.class);
-    sources.add(WebServiceConfig.class);
-    final SpringApplication userManagement = new SpringApplication(UserManagement.class);
-    userManagement.addPrimarySources(sources);
-
-    Properties userManagementProperties = new Properties();
-    userManagementProperties.setProperty("address.service.url",
-        String.format("http://localhost:%d", addressServicePort));
-    userManagementProperties.setProperty("payment.service.url",
-        String.format("http://localhost:%d", paymentServicePort));
-
-    final ConfigurableEnvironment env = new StandardEnvironment();
-    try {
-      env.getPropertySources()
-          .addLast(new ResourcePropertySource("classpath:application-test.properties"));
-    } catch (IOException ioException) {
-      ioException.printStackTrace();
-    }
-    env.getPropertySources()
-        .addLast(new PropertiesPropertySource("serviceProps", userManagementProperties));
-
-    userManagement.setEnvironment(env);
-    appContext = userManagement.run();
   }
 
 }

@@ -3,7 +3,6 @@ package com.griddynamics.gridu.qa.user.e2e;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.CREATE_USER_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +37,7 @@ public class CreateUserTest extends BaseTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequest(firstName, lastName, email);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
+    InputStream responseInputStream = given(getSpecForPort(appPort))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -71,7 +70,7 @@ public class CreateUserTest extends BaseTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(newAddress);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
+    InputStream responseInputStream = given(getSpecForPort(appPort))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -116,7 +115,7 @@ public class CreateUserTest extends BaseTest {
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithPayment(newPayment);
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
+    InputStream responseInputStream = given(getSpecForPort(appPort))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -154,7 +153,7 @@ public class CreateUserTest extends BaseTest {
       CreateUserRequest createUserRequest) {
     logger.info(caseName);
 
-    given(getSpecForPort(DEFAULT_UM_PORT))
+    given(getSpecForPort(appPort))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
