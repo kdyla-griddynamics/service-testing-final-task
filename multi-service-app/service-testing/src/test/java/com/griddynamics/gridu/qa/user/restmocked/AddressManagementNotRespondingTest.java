@@ -3,7 +3,7 @@ package com.griddynamics.gridu.qa.user.restmocked;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSOAPSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +46,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
 
     Mockito.when(addressApi.getAddressesByUserId(userId)).thenReturn(null);
 
-    InputStream responseInputStream = given(getSpecForPort(appPort))
+    InputStream responseInputStream = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()
@@ -77,7 +77,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
     Mockito.doThrow(ApiException.class).when(addressApi)
         .updateAddressesByUserId(Mockito.anyLong(), Mockito.anyList());
 
-    Response response = given(getSpecForPort(appPort))
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -108,7 +108,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
     Mockito.doThrow(ApiException.class).when(addressApi)
         .updateAddressesByUserId(userId, addressList);
 
-    Response response = given(getSpecForPort(appPort))
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(UpdateUserRequest.class, updateUserRequest))
         .when()
         .post()
@@ -143,7 +143,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
     Mockito.doThrow(ApiException.class).when(addressApi)
         .deleteAllUserAddresses(userId);
 
-    Response response = given(getSpecForPort(appPort))
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()

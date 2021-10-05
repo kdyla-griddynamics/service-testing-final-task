@@ -3,7 +3,7 @@ package com.griddynamics.gridu.qa.user;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSOAPSpecForPort;
 import static io.restassured.RestAssured.given;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -156,7 +156,7 @@ public abstract class BaseTest extends AbstractTestNGSpringContextTests {
   protected UserDetails getUserDetailsForGivenId(long id) {
     GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(id);
 
-    InputStream responseInputStream = given(getSpecForPort(appPort))
+    InputStream responseInputStream = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()

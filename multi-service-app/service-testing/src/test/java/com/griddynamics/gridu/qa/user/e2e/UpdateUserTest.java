@@ -3,7 +3,7 @@ package com.griddynamics.gridu.qa.user.e2e;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.UPDATE_USER_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSOAPSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -28,7 +28,7 @@ public class UpdateUserTest extends BaseTest {
 
     UpdateUserRequest updateUserRequest = getUpdateUserRequest(2);
 
-    InputStream responseInputStream = given(getSpecForPort(appPort))
+    InputStream responseInputStream = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(UpdateUserRequest.class, updateUserRequest))
         .when()
         .post()
@@ -54,7 +54,7 @@ public class UpdateUserTest extends BaseTest {
 
     UpdateUserRequest updateUserRequest = getUpdateUserRequest(Integer.MAX_VALUE);
 
-    Response response = given(getSpecForPort(appPort))
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(UpdateUserRequest.class, updateUserRequest))
         .when()
         .post()
