@@ -50,7 +50,7 @@ public class PaymentManagementNotRespondingTest extends BaseTest {
   public void getUserDetailsWhenPaymentManagementServiceIsDown() {
     logger.info("PM mocked: payment not found. Get User Details");
 
-    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(1);
+    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(3);
 
     InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
@@ -160,6 +160,10 @@ public class PaymentManagementNotRespondingTest extends BaseTest {
             .withStatus(404)
             .withStatusMessage("Payment not found - mocked")));
     wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching(PAYMENT_PATH))
+        .willReturn(WireMock.aResponse()
+            .withStatus(404)
+            .withStatusMessage("Payment not found - mocked")));
+    wireMockServer.stubFor(WireMock.delete(WireMock.urlPathMatching(PAYMENT_PATH))
         .willReturn(WireMock.aResponse()
             .withStatus(404)
             .withStatusMessage("Payment not found - mocked")));

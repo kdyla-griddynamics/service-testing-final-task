@@ -50,7 +50,7 @@ public class AddressManagementNotRespondingTest extends BaseTest {
   public void getUserDetailsWhenAddressManagementServiceIsDown() {
     logger.info("AM mocked: address not found. Get User Details");
 
-    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(1);
+    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(3);
 
     InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
@@ -160,6 +160,10 @@ public class AddressManagementNotRespondingTest extends BaseTest {
             .withStatus(404)
             .withStatusMessage("Address not found - mocked")));
     wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching(ADDRESS_PATH))
+        .willReturn(WireMock.aResponse()
+            .withStatus(404)
+            .withStatusMessage("Address not found - mocked")));
+    wireMockServer.stubFor(WireMock.delete(WireMock.urlPathMatching(ADDRESS_PATH))
         .willReturn(WireMock.aResponse()
             .withStatus(404)
             .withStatusMessage("Address not found - mocked")));
