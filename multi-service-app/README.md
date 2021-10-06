@@ -36,13 +36,13 @@ E2E tests use wiremock, and Payment Management REST API tests use Mockito
 
 To start tests for tasks 1 and 2 and generate allure report, go to service-testing module directory and run:<br/>
 ```
-mvn clean install
+mvn clean test
 mvn allure:serve
 ```
 
 To start tests for task 3 and generate allure report, go to payment-management-api module directory and run:<br/>
 ```
-mvn clean install
+mvn clean test
 mvn allure:serve
 ```
 
