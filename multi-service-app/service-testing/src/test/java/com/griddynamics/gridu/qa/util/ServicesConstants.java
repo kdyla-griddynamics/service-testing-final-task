@@ -8,6 +8,7 @@ public class ServicesConstants {
 
   private static final String BASE_URI = "http://localhost:%s";
   public static final String PAYMENT_PATH = "/payment";
+  public static final String CARD_VERIFY_PATH = "/card/verify";
 
   public static final int MOCKED_PORT = 8888;
 

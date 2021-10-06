@@ -1,5 +1,6 @@
 package com.griddynamics.gridu.qa.payment;
 
+import static com.griddynamics.gridu.qa.util.ServicesConstants.CARD_VERIFY_PATH;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.MOCKED_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.PAYMENT_PATH;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getRESTSpecForPort;
@@ -23,12 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
 
 @SpringBootTest(classes = PaymentManagement.class,
     webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -39,9 +36,20 @@ public class PaymentApiBaseTest extends AbstractTestNGSpringContextTests {
   @LocalServerPort
   protected int appPort;
 
-  protected ObjectWriter jsonWriter = new ObjectMapper().writer();
-  protected final String CARD_VERIFY_PATH = "/card/verify";
-  protected WireMockServer wireMockServer;
+  static ObjectWriter jsonWriter = new ObjectMapper().writer();
+  static WireMockServer wireMockServer = new WireMockServer(
+      WireMockConfiguration.wireMockConfig().port(MOCKED_PORT));
+
+  @BeforeSuite(alwaysRun = true)
+  public static void startWireMock() throws JsonProcessingException {
+    wireMockServer.start();
+    createStubs();
+  }
+
+  @AfterSuite(alwaysRun = true)
+  public void stopWiremock() {
+    wireMockServer.stop();
+  }
 
   protected List<Payment> getPaymentsByUserId(long userId) {
     Response response = given().spec(getRESTSpecForPort(appPort))
@@ -56,15 +64,15 @@ public class PaymentApiBaseTest extends AbstractTestNGSpringContextTests {
         .getList(".", Payment.class);
   }
 
-  protected String getCorrectCardRegex() {
+  private static String getCorrectCardRegex() {
     return "(\\{\"cardNumber\":\"([0-9]{16})\",\"cardHolder\":\"[a-zA-Z ]+\",\"expiryYear\":([0-9]{2,4}),\"expiryMonth\":([0-9]{1,2}),\"cvv\":\"([0-9]{3})\"\\})";
   }
 
-  protected String getIncorrectCardRegex() {
+  private static String getIncorrectCardRegex() {
     return "(\\{\"cardNumber\":(null),\"cardHolder\":(null),\"expiryYear\":(null),\"expiryMonth\":(null),\"cvv\":(null)\\})";
   }
 
-  protected void createStubs() throws JsonProcessingException {
+  private static void createStubs() throws JsonProcessingException {
     wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(CARD_VERIFY_PATH))
         .withRequestBody(WireMock.matching(getCorrectCardRegex()))
         .willReturn(WireMock.aResponse()

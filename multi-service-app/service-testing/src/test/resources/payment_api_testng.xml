@@ -1,23 +1,11 @@
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd" >
 
 <suite name="PaymentManagement">
-  <test name="Create Payment test with payment gateway mocked">
+  <test name="REST API test with payment gateway mocked">
     <classes>
       <class name="com.griddynamics.gridu.qa.payment.CreatePaymentTest"/>
-    </classes>
-  </test>
-  <test name="Update Payment test with payment gateway mocked">
-    <classes>
       <class name="com.griddynamics.gridu.qa.payment.UpdatePaymentTest"/>
-    </classes>
-  </test>
-  <test name="Get Payment test with payment gateway mocked">
-    <classes>
       <class name="com.griddynamics.gridu.qa.payment.GetPaymentTest"/>
-    </classes>
-  </test>
-  <test name="Delete Payment test with payment gateway mocked">
-    <classes>
       <class name="com.griddynamics.gridu.qa.payment.DeletePaymentTest"/>
     </classes>
   </test>
