@@ -23,8 +23,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 
 @SpringBootTest(classes = PaymentManagement.class,
     webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -35,21 +39,9 @@ public class PaymentApiBaseTest extends AbstractTestNGSpringContextTests {
   @LocalServerPort
   protected int appPort;
 
-  protected WireMockServer wireMockServer;
   protected ObjectWriter jsonWriter = new ObjectMapper().writer();
   protected final String CARD_VERIFY_PATH = "/card/verify";
-
-  @BeforeSuite
-  public void startWiremock() throws JsonProcessingException {
-    wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(MOCKED_PORT));
-    wireMockServer.start();
-    createStubs();
-  }
-
-  @AfterSuite
-  public void stopWiremock() {
-    wireMockServer.stop();
-  }
+  protected WireMockServer wireMockServer;
 
   protected List<Payment> getPaymentsByUserId(long userId) {
     Response response = given().spec(getRESTSpecForPort(appPort))
@@ -68,11 +60,11 @@ public class PaymentApiBaseTest extends AbstractTestNGSpringContextTests {
     return "(\\{\"cardNumber\":\"([0-9]{16})\",\"cardHolder\":\"[a-zA-Z ]+\",\"expiryYear\":([0-9]{2,4}),\"expiryMonth\":([0-9]{1,2}),\"cvv\":\"([0-9]{3})\"\\})";
   }
 
-  protected String getIncorrectCardRegex(){
+  protected String getIncorrectCardRegex() {
     return "(\\{\"cardNumber\":(null),\"cardHolder\":(null),\"expiryYear\":(null),\"expiryMonth\":(null),\"cvv\":(null)\\})";
   }
 
-  private void createStubs() throws JsonProcessingException {
+  protected void createStubs() throws JsonProcessingException {
     wireMockServer.stubFor(WireMock.post(WireMock.urlEqualTo(CARD_VERIFY_PATH))
         .withRequestBody(WireMock.matching(getCorrectCardRegex()))
         .willReturn(WireMock.aResponse()
