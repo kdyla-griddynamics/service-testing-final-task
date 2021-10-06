@@ -2,16 +2,14 @@ package com.griddynamics.gridu.qa.user.restmocked;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.extractResponseOfGivenType;
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
 import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_RESPONSE_LOCALNAME;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.MOCKED_PORT;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSOAPSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import com.griddynamics.gridu.qa.address.ApiException;
+import com.griddynamics.gridu.qa.address.api.AddressApi;
+import com.griddynamics.gridu.qa.address.api.model.Address;
 import com.griddynamics.gridu.qa.user.BaseTest;
 import com.griddynamics.gridu.qa.user.CreateUserRequest;
 import com.griddynamics.gridu.qa.user.DeleteUserRequest;
@@ -23,36 +21,32 @@ import com.griddynamics.gridu.qa.user.db.model.UserModel;
 import com.griddynamics.gridu.qa.user.service.DtoConverter;
 import io.restassured.response.Response;
 import java.io.InputStream;
+import java.util.List;
 import org.apache.log4j.Logger;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.testng.annotations.Test;
 
 public class AddressManagementNotRespondingTest extends BaseTest {
 
   private static final Logger logger = Logger.getLogger(AddressManagementNotRespondingTest.class);
-  private static final String ADDRESS_PATH = "/address/([0-9]*)";
+
+  @MockBean
+  private AddressApi addressApi;
+
   private final DtoConverter dtoConverter = new DtoConverter();
 
-  @BeforeClass(alwaysRun = true)
-  public void startWireMock() {
-    wireMockServer = new WireMockServer(WireMockConfiguration.options().port(MOCKED_PORT));
-    wireMockServer.start();
-    createAllStubs();
-  }
-
-  @AfterClass(alwaysRun = true)
-  public void removeStubs() {
-    wireMockServer.resetMappings();
-  }
-
   @Test()
-  public void getUserDetailsWhenAddressManagementServiceIsDown() {
+  public void getUserDetailsWhenAddressManagementServiceIsDown() throws ApiException {
     logger.info("AM mocked: address not found. Get User Details");
 
-    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(3);
+    long userId = 3;
 
-    InputStream responseInputStream = given(getSpecForPort(DEFAULT_UM_PORT))
+    GetUserDetailsRequest getUserDetailsRequest = getGetUserDetailsRequest(userId);
+
+    Mockito.when(addressApi.getAddressesByUserId(userId)).thenReturn(null);
+
+    InputStream responseInputStream = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(GetUserDetailsRequest.class, getUserDetailsRequest))
         .when()
         .post()
@@ -60,7 +54,8 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(200)
         .and()
         .extract().asInputStream();
-    wireMockServer.verify(WireMock.getRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
+
+    Mockito.verify(addressApi).getAddressesByUserId(userId);
 
     GetUserDetailsResponse getUserDetailsResponse = extractResponseOfGivenType(responseInputStream,
         GetUserDetailsResponse.class, GET_USER_DETAILS_RESPONSE_LOCALNAME);
@@ -74,12 +69,15 @@ public class AddressManagementNotRespondingTest extends BaseTest {
   }
 
   @Test()
-  public void createUserWhenAddressManagementServiceIsDown() {
+  public void createUserWhenAddressManagementServiceIsDown() throws ApiException {
     logger.info("AM mocked: address not found. Create User");
 
     CreateUserRequest createUserRequest = getCreateUserRequestWithAddress(createNewAddress());
 
-    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
+    Mockito.doThrow(ApiException.class).when(addressApi)
+        .updateAddressesByUserId(Mockito.anyLong(), Mockito.anyList());
+
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(CreateUserRequest.class, createUserRequest))
         .when()
         .post()
@@ -87,22 +85,30 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(500)
         .and()
         .extract().response();
-    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
 
-    String responseFaultMessage = response.xmlPath().getString("Envelope.Body.Fault.faultstring");
+    Mockito.verify(addressApi)
+        .updateAddressesByUserId(Mockito.anyLong(), Mockito.anyList());
+
+    String responseFaultMessage = getFaultMessage(response);
     assertThat(responseFaultMessage).isEqualTo("Can not save user addresses!");
   }
 
   @Test()
-  public void updateUserWhenAddressManagementServiceIsDown() {
+  public void updateUserWhenAddressManagementServiceIsDown() throws ApiException {
     logger.info("AM mocked: address not found. Update User");
 
-    long id = 2;
-    UserDetails userDetailsBeforeUpdate = getUserDetailsForGivenId(id);
+    long userId = 2;
 
-    UpdateUserRequest updateUserRequest = getUpdateUserRequest(id);
+    UserDetails userDetailsBeforeUpdate = getUserDetailsForGivenId(userId);
+    UpdateUserRequest updateUserRequest = getUpdateUserRequest(userId);
 
-    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
+    List<Address> addressList = dtoConverter
+        .convertAddresses(updateUserRequest.getUserDetails().getAddresses(), userId);
+
+    Mockito.doThrow(ApiException.class).when(addressApi)
+        .updateAddressesByUserId(userId, addressList);
+
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(UpdateUserRequest.class, updateUserRequest))
         .when()
         .post()
@@ -110,12 +116,14 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(500)
         .and()
         .extract().response();
-    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
 
-    String responseFaultMessage = response.xmlPath().getString("Envelope.Body.Fault.faultstring");
+    Mockito.verify(addressApi)
+        .updateAddressesByUserId(userId, addressList);
+
+    String responseFaultMessage = getFaultMessage(response);
     assertThat(responseFaultMessage).isEqualTo("Can not save user addresses!");
 
-    UserDetails userDetailsAfterUpdate = getUserDetailsForGivenId(id);
+    UserDetails userDetailsAfterUpdate = getUserDetailsForGivenId(userId);
 
     UserModel userModelBeforeUpdate = dtoConverter.convertUserDetails(userDetailsBeforeUpdate);
     UserModel userModelAfterUpdate = dtoConverter.convertUserDetails(userDetailsAfterUpdate);
@@ -124,15 +132,18 @@ public class AddressManagementNotRespondingTest extends BaseTest {
   }
 
   @Test()
-  public void deleteUserWhenAddressManagementServiceIsDown() {
+  public void deleteUserWhenAddressManagementServiceIsDown() throws ApiException {
     logger.info("AM mocked: address not found. Delete User");
 
-    long id = 1;
+    long userId = 1;
 
-    UserDetails userDetailsBeforeDeletion = getUserDetailsForGivenId(id);
-    DeleteUserRequest deleteUserRequest = getDeleteUserRequest(id);
+    UserDetails userDetailsBeforeDeletion = getUserDetailsForGivenId(userId);
+    DeleteUserRequest deleteUserRequest = getDeleteUserRequest(userId);
 
-    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
+    Mockito.doThrow(ApiException.class).when(addressApi)
+        .deleteAllUserAddresses(userId);
+
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()
@@ -140,32 +151,19 @@ public class AddressManagementNotRespondingTest extends BaseTest {
         .assertThat().statusCode(500)
         .and()
         .extract().response();
-    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlPathMatching(ADDRESS_PATH)));
 
-    String responseFaultMessage = response.xmlPath().getString("Envelope.Body.Fault.faultstring");
+    Mockito.verify(addressApi)
+        .deleteAllUserAddresses(userId);
+
+    String responseFaultMessage = getFaultMessage(response);
     assertThat(responseFaultMessage).isEqualTo("Can not delete user's payments and/or addresses");
 
-    UserDetails userDetailsAfterDeletion = getUserDetailsForGivenId(id);
+    UserDetails userDetailsAfterDeletion = getUserDetailsForGivenId(userId);
 
     UserModel userModelBeforeDeletion = dtoConverter.convertUserDetails(userDetailsBeforeDeletion);
     UserModel userModelAfterDeletion = dtoConverter.convertUserDetails(userDetailsAfterDeletion);
 
     assertThat(userModelAfterDeletion).usingRecursiveComparison()
         .isEqualTo(userModelBeforeDeletion);
-  }
-
-  private void createAllStubs() {
-    wireMockServer.stubFor(WireMock.get(WireMock.urlPathMatching(ADDRESS_PATH))
-        .willReturn(WireMock.aResponse()
-            .withStatus(404)
-            .withStatusMessage("Address not found - mocked")));
-    wireMockServer.stubFor(WireMock.post(WireMock.urlPathMatching(ADDRESS_PATH))
-        .willReturn(WireMock.aResponse()
-            .withStatus(404)
-            .withStatusMessage("Address not found - mocked")));
-    wireMockServer.stubFor(WireMock.delete(WireMock.urlPathMatching(ADDRESS_PATH))
-        .willReturn(WireMock.aResponse()
-            .withStatus(404)
-            .withStatusMessage("Address not found - mocked")));
   }
 }

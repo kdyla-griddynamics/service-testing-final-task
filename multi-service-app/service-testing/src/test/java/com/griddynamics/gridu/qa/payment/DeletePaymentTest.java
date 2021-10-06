@@ -1,18 +1,13 @@
 package com.griddynamics.gridu.qa.payment;
 
 import static com.griddynamics.gridu.qa.util.ServicesConstants.PAYMENT_PATH;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getRESTSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.griddynamics.gridu.qa.gateway.api.CardApi;
 import com.griddynamics.gridu.qa.payment.api.model.Payment;
-import com.griddynamics.gridu.qa.payment.service.DtoConverter;
-import io.restassured.response.Response;
 import java.util.List;
 import org.apache.log4j.Logger;
-import org.assertj.core.api.SoftAssertions;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.testng.annotations.Test;
 
 public class DeletePaymentTest extends PaymentApiBaseTest {
@@ -25,16 +20,16 @@ public class DeletePaymentTest extends PaymentApiBaseTest {
 
     long userId = 2L;
 
-    List<Payment> paymentsListBeforeDeletion  = getPaymentsByUserId(userId);
+    List<Payment> paymentsListBeforeDeletion = getPaymentsByUserId(userId);
 
-    given().spec(getSpecForPort(appPort))
+    given().spec(getRESTSpecForPort(appPort))
         .log().all()
         .when()
         .delete(String.format("%s/%s", PAYMENT_PATH, userId))
         .then().log().all()
         .assertThat().statusCode(204);
 
-    List<Payment> paymentsListAfterDeletion  = getPaymentsByUserId(userId);
+    List<Payment> paymentsListAfterDeletion = getPaymentsByUserId(userId);
 
     assertThat(paymentsListBeforeDeletion).isNotEmpty();
     assertThat(paymentsListAfterDeletion).isEmpty();
@@ -46,7 +41,7 @@ public class DeletePaymentTest extends PaymentApiBaseTest {
 
     long userId = Integer.MAX_VALUE;
 
-    given().spec(getSpecForPort(appPort))
+    given().spec(getRESTSpecForPort(appPort))
         .log().all()
         .when()
         .delete(String.format("%s/%s", PAYMENT_PATH, userId))
@@ -58,7 +53,7 @@ public class DeletePaymentTest extends PaymentApiBaseTest {
   public void cannotDeletePaymentsByInvalidUserId() {
     logger.info("Cannot delete payments by invalid user id");
 
-    given().spec(getSpecForPort(appPort))
+    given().spec(getRESTSpecForPort(appPort))
         .log().all()
         .when()
         .delete(String.format("%s/%s", PAYMENT_PATH, "invalidId"))

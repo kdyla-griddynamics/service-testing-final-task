@@ -1,8 +1,7 @@
 package com.griddynamics.gridu.qa.user.e2e;
 
 import static com.griddynamics.gridu.qa.util.SOAPWrappers.getRequestOfGivenType;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.DEFAULT_UM_PORT;
-import static com.griddynamics.gridu.qa.util.ServicesConstants.getSpecForPort;
+import static com.griddynamics.gridu.qa.util.ServicesConstants.getSOAPSpecForPort;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +26,7 @@ public class DeleteUserTest extends BaseTest {
     long id = 4;
     DeleteUserRequest deleteUserRequest = getDeleteUserRequest(id);
 
-    given(getSpecForPort(DEFAULT_UM_PORT))
+    given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()
@@ -50,7 +49,7 @@ public class DeleteUserTest extends BaseTest {
 
     DeleteUserRequest deleteUserRequest = getDeleteUserRequest(Integer.MAX_VALUE);
 
-    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()
@@ -71,7 +70,7 @@ public class DeleteUserTest extends BaseTest {
     UserDetails userDetailsBeforeDeletion = getUserDetailsForGivenId(id);
     DeleteUserRequest deleteUserRequest = getDeleteUserRequest(id);
 
-    Response response = given(getSpecForPort(DEFAULT_UM_PORT))
+    Response response = given(getSOAPSpecForPort(appPort))
         .body(getRequestOfGivenType(DeleteUserRequest.class, deleteUserRequest))
         .when()
         .post()
