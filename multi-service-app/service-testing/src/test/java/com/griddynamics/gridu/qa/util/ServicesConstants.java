@@ -9,6 +9,8 @@ public class ServicesConstants {
   private static final String BASE_URI = "http://localhost:%s";
   public static final String PAYMENT_PATH = "/payment";
 
+  public static final int MOCKED_PORT = 8888;
+
   private static final String USER_MANAGEMENT_BASE_URI = String.format("%s/ws/users.wsdl", BASE_URI);
   public static final String USER_MANAGEMENT_NAMESPACE = "http://gridu.qa.payment.griddynamics.com/springsoap/gen";
   public static final String CREATE_USER_RESPONSE_LOCALNAME = "createUserResponse";

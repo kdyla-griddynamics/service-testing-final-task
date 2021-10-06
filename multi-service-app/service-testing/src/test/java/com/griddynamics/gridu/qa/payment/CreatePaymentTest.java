@@ -5,29 +5,25 @@ import static com.griddynamics.gridu.qa.util.ServicesConstants.getRESTSpecForPor
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import com.griddynamics.gridu.qa.gateway.ApiException;
-import com.griddynamics.gridu.qa.gateway.api.CardApi;
 import com.griddynamics.gridu.qa.gateway.api.model.Card;
 import com.griddynamics.gridu.qa.payment.api.model.Payment;
 import com.griddynamics.gridu.qa.payment.db.model.PaymentModel;
 import com.griddynamics.gridu.qa.payment.service.DtoConverter;
 import io.restassured.response.Response;
 import org.apache.log4j.Logger;
-import org.mockito.Mockito;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.testng.annotations.Test;
 
 public class CreatePaymentTest extends PaymentApiBaseTest {
 
   private static final Logger logger = Logger.getLogger(CreatePaymentTest.class);
 
-  @MockBean
-  private CardApi cardApi;
-
   private final DtoConverter dtoConverter = new DtoConverter();
 
   @Test
-  public void canCreateCorrectPayment() throws ApiException {
+  public void canCreateCorrectPayment() throws JsonProcessingException {
     logger.info("Create correct payment with mocked token");
 
     Payment paymentToCreate = new Payment();
@@ -41,18 +37,17 @@ public class CreatePaymentTest extends PaymentApiBaseTest {
     PaymentModel paymentModel = dtoConverter.convertFrom(paymentToCreate);
     Card card = dtoConverter.convertToCard(paymentModel);
 
-    Mockito.when(cardApi.verifyCard(card)).thenReturn("mocked payment verified");
-
     Response response = given().spec(getRESTSpecForPort(appPort))
         .body(paymentToCreate)
-        .log().all()
+        .log().body()
         .when()
         .post(PAYMENT_PATH)
-        .then().log().all()
+        .then().log().body()
         .assertThat().statusCode(201)
         .extract().response();
 
-    Mockito.verify(cardApi, Mockito.times(1)).verifyCard(card);
+    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CARD_VERIFY_PATH))
+        .withRequestBody(WireMock.containing(jsonWriter.writeValueAsString(card))));
 
     Payment paymentFromResponse = response.as(Payment.class);
 
@@ -64,39 +59,37 @@ public class CreatePaymentTest extends PaymentApiBaseTest {
   }
 
   @Test
-  public void cannotCreateIncorrectPayment() throws ApiException {
+  public void cannotCreateIncorrectPayment() throws JsonProcessingException {
     logger.info("Create empty payment with mocked token");
 
     Payment emptyPayment = new Payment();
     PaymentModel paymentModel = dtoConverter.convertFrom(emptyPayment);
     Card card = dtoConverter.convertToCard(paymentModel);
 
-    Mockito.when(cardApi.verifyCard(card)).thenReturn(PaymentModel.FAILED_TOKEN);
-
     given().spec(getRESTSpecForPort(appPort))
         .body(emptyPayment)
-        .log().all()
+        .log().body()
         .when()
         .post(PAYMENT_PATH)
-        .then().log().all()
+        .then().log().ifError()
         .assertThat().statusCode(405);
 
-    Mockito.verify(cardApi, Mockito.times(1)).verifyCard(card);
+    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CARD_VERIFY_PATH))
+        .withRequestBody(WireMock.containing(jsonWriter.writeValueAsString(card))));
   }
 
   @Test
   public void createPaymentRequestWithoutBodyShouldReturnException() throws ApiException {
     logger.info("Create payment request without body should throw API Exception");
 
-    Mockito.when(cardApi.verifyCard(null)).thenThrow(ApiException.class);
-
     given().spec(getRESTSpecForPort(appPort))
         .log().all()
         .when()
         .post(PAYMENT_PATH)
-        .then().log().all();
+        .then().log().ifError()
+        .assertThat().statusCode(400);
 
-    Mockito.verify(cardApi, Mockito.times(1)).verifyCard(new Card());
+    wireMockServer.verify(WireMock.postRequestedFor(WireMock.urlEqualTo(CARD_VERIFY_PATH)));
   }
 
 }
