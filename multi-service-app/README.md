@@ -31,7 +31,8 @@ You should also add generated (by Swagger) classes into IDEA
 
 ![generated_resources.png](generated_resources.png)
 
-# Service Testing course final task
+# Service Testing course final task - solution 2
+E2E tests use wiremock, and Payment Management REST API tests use Mockito
 
 To start tests for tasks 1 and 2 and generate allure report, go to service-testing module directory and run:<br/>
 ```
