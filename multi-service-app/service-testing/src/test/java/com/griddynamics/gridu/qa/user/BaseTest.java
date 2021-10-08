@@ -6,7 +6,6 @@ import static com.griddynamics.gridu.qa.util.ServicesConstants.GET_USER_DETAILS_
 import static com.griddynamics.gridu.qa.util.ServicesConstants.getSOAPSpecForPort;
 import static io.restassured.RestAssured.given;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Addresses;
 import com.griddynamics.gridu.qa.user.CreateUserRequest.Payments;
 import io.restassured.response.Response;

@@ -18,10 +18,8 @@ import io.restassured.response.Response;
 import java.util.List;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.mock.mockito.MockitoTestExecutionListener;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterSuite;
@@ -29,7 +27,6 @@ import org.testng.annotations.BeforeSuite;
 
 @SpringBootTest(classes = PaymentManagement.class,
     webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestExecutionListeners(MockitoTestExecutionListener.class)
 @TestPropertySource("classpath:application-test.properties")
 public class PaymentApiBaseTest extends AbstractTestNGSpringContextTests {
 
