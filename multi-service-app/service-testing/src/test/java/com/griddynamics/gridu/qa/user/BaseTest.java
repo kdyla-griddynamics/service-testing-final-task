@@ -41,7 +41,6 @@ public abstract class BaseTest extends AbstractTestNGSpringContextTests {
   protected final String firstName = "Mike";
   protected final String lastName = "Clark";
   protected final String email = "some-email@gmail.com";
-  protected WireMockServer wireMockServer;
 
   protected CreateUserRequest getCreateUserRequest(String name, String lastName, String email) {
     CreateUserRequest request = new CreateUserRequest();
